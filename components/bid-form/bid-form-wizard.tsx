@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ import { StepRoofScope } from "./step-roof-scope";
 import { StepCost } from "./step-cost";
 import { StepReview } from "./step-review";
 import { calculateBid, DEFAULT_RATES, type PricingInputs, type RateTable } from "@/lib/pricing-engine";
+import { calcBidDefaults, COMMISSION_AMOUNT, CREW_COUNT } from "@/lib/bid-rules";
 import { cn } from "@/lib/utils";
 
 export interface BidFormData {
@@ -33,13 +34,13 @@ export interface BidFormData {
   attachmentCount: string;
   workScope: string;
   notes: string;
-  // Step 4: Cost Inputs
-  partsEstimate: number;
-  morePartsEstimate: number;
-  crewCount: number;
-  crewDays: number;
-  milesFromJob: number;
-  commissionAmount: number;
+  // Step 4: Cost Inputs (mostly auto-calculated — only miles/permit/rack/sub are user-editable)
+  partsEstimate: number;       // auto: panelCount × 1.5 × $35
+  morePartsEstimate: number;   // always 0
+  crewCount: number;           // always 2
+  crewDays: number;            // auto: by panel count + roof type + stories
+  commissionAmount: number;    // always $400, not shown to user
+  milesFromJob: number;        // auto-calculated from job address, user can override
   subContractorCost: number;
   rackCost: number;
   permitFeeAmount: number;
@@ -47,8 +48,20 @@ export interface BidFormData {
 
 const STEPS = ["Customer", "System", "Roof & Scope", "Cost Inputs", "Review"];
 
+interface Customer {
+  id: string;
+  firstName: string;
+  lastName: string;
+  siteAddress: string;
+  siteCity: string | null;
+  siteState: string | null;
+  siteZip: string | null;
+  email: string | null;
+  phone: string | null;
+}
+
 interface Props {
-  customers: { id: string; firstName: string; lastName: string; siteAddress: string; siteCity: string | null; email: string | null; phone: string | null }[];
+  customers: Customer[];
   defaultRates: Partial<RateTable> | null;
 }
 
@@ -68,12 +81,13 @@ const defaultForm: BidFormData = {
   attachmentCount: "",
   workScope: "FULL_RR",
   notes: "",
+  // Auto-calculated defaults
   partsEstimate: 0,
   morePartsEstimate: 0,
-  crewCount: 2,
-  crewDays: 1,
+  crewCount: CREW_COUNT,
+  crewDays: 1.3,
+  commissionAmount: COMMISSION_AMOUNT,
   milesFromJob: 0,
-  commissionAmount: 400,
   subContractorCost: 0,
   rackCost: 0,
   permitFeeAmount: 0,
@@ -84,8 +98,48 @@ export function BidFormWizard({ customers, defaultRates }: Props) {
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<BidFormData>(defaultForm);
   const [saving, setSaving] = useState(false);
+  const [milesLoading, setMilesLoading] = useState(false);
 
-  const update = (patch: Partial<BidFormData>) => setForm((f) => ({ ...f, ...patch }));
+  const update = useCallback(
+    (patch: Partial<BidFormData>) => setForm((f) => ({ ...f, ...patch })),
+    []
+  );
+
+  // ── Auto-calculate parts + crew when panel count / roof type / stories change ──
+  useEffect(() => {
+    if (form.panelCount <= 0) return;
+    setForm((f) => ({ ...f, ...calcBidDefaults(f.panelCount, f.roofType, f.stories) }));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.panelCount, form.roofType, form.stories]);
+
+  // ── Auto-calculate one-way miles from job address when customer changes ────────
+  useEffect(() => {
+    if (!form.customerId) return;
+    const customer = customers.find((c) => c.id === form.customerId);
+    if (!customer?.siteAddress) return;
+
+    const address = [customer.siteAddress, customer.siteCity, customer.siteState, customer.siteZip]
+      .filter(Boolean)
+      .join(", ");
+
+    let cancelled = false;
+    setMilesLoading(true);
+
+    fetch(`/api/utils/distance?address=${encodeURIComponent(address)}`)
+      .then((r) => r.json())
+      .then(({ miles }: { miles?: number }) => {
+        if (!cancelled && typeof miles === "number" && miles > 0) {
+          setForm((f) => ({ ...f, milesFromJob: miles }));
+        }
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setMilesLoading(false);
+      });
+
+    return () => { cancelled = true; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.customerId]);
 
   const rates: RateTable = {
     ...DEFAULT_RATES,
@@ -162,7 +216,7 @@ export function BidFormWizard({ customers, defaultRates }: Props) {
           {step === 0 && <StepCustomer form={form} update={update} customers={customers} />}
           {step === 1 && <StepSystem form={form} update={update} />}
           {step === 2 && <StepRoofScope form={form} update={update} />}
-          {step === 3 && <StepCost form={form} update={update} />}
+          {step === 3 && <StepCost form={form} update={update} milesLoading={milesLoading} />}
           {step === 4 && <StepReview form={form} customers={customers} pricing={pricing} />}
         </CardContent>
       </Card>

@@ -8,7 +8,7 @@ export default async function NewBidPage() {
   const customers = await prisma.customer.findMany({
     where: { contractorId: session!.user.contractorId! },
     orderBy: { firstName: "asc" },
-    select: { id: true, firstName: true, lastName: true, siteAddress: true, siteCity: true, email: true, phone: true },
+    select: { id: true, firstName: true, lastName: true, siteAddress: true, siteCity: true, siteState: true, siteZip: true, email: true, phone: true },
   });
 
   const defaultRates = await prisma.defaultPricingConfig.findUnique({ where: { id: "default" } });
