@@ -46,7 +46,7 @@ export function StepReview({ form, customers, pricing }: Props) {
           <div><span className="text-muted-foreground">Panels:</span> {form.panelCount}</div>
           {form.systemSizeKw && <div><span className="text-muted-foreground">System Size:</span> {form.systemSizeKw} kW</div>}
           {form.panelBrand && <div><span className="text-muted-foreground">Brand:</span> {form.panelBrand} {form.panelModel}</div>}
-          {form.inverterType && <div><span className="text-muted-foreground">Inverter:</span> {form.inverterType} {form.inverterBrand}</div>}
+          {form.inverterType && <div><span className="text-muted-foreground">Inverter:</span> {form.inverterType}{form.inverterBrand ? ` — ${form.inverterBrand}` : ""}</div>}
         </div>
       </section>
 
@@ -62,36 +62,66 @@ export function StepReview({ form, customers, pricing }: Props) {
           {form.railLinearFt && <div><span className="text-muted-foreground">Rail:</span> {form.railLinearFt} lin ft</div>}
           {form.attachmentCount && <div><span className="text-muted-foreground">Attachments:</span> {form.attachmentCount}</div>}
         </div>
-        {(form.includePermit || form.includeInspection) && (
-          <p className="mt-2 text-muted-foreground">
-            Includes: {[form.includePermit && "Permit", form.includeInspection && "Inspection"].filter(Boolean).join(", ")}
-          </p>
-        )}
         {form.notes && <p className="mt-2 italic text-muted-foreground">"{form.notes}"</p>}
       </section>
 
       <Separator />
 
       <section>
+        <p className="font-semibold text-base mb-2">Cost Inputs</p>
+        <div className="grid grid-cols-2 gap-x-8 gap-y-1">
+          <div><span className="text-muted-foreground">Parts:</span> {formatCurrency(form.partsEstimate)}</div>
+          {form.morePartsEstimate > 0 && <div><span className="text-muted-foreground">Add'l Parts:</span> {formatCurrency(form.morePartsEstimate)}</div>}
+          {form.rackCost > 0 && <div><span className="text-muted-foreground">Rack/Rail:</span> {formatCurrency(form.rackCost)}</div>}
+          <div><span className="text-muted-foreground">Crew:</span> {form.crewCount} people × {form.crewDays} day{form.crewDays !== 1 ? "s" : ""}</div>
+          {form.milesFromJob > 0 && <div><span className="text-muted-foreground">Miles:</span> {form.milesFromJob} mi</div>}
+          {form.commissionAmount > 0 && <div><span className="text-muted-foreground">Commission:</span> {formatCurrency(form.commissionAmount)}</div>}
+          {form.subContractorCost > 0 && <div><span className="text-muted-foreground">Sub-Contractor:</span> {formatCurrency(form.subContractorCost)}</div>}
+          {form.permitFeeAmount > 0 && <div><span className="text-muted-foreground">Permit Fee:</span> {formatCurrency(form.permitFeeAmount)}</div>}
+        </div>
+      </section>
+
+      <Separator />
+
+      <section>
         <p className="font-semibold text-base mb-3">Pricing Breakdown</p>
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           {pricing.lineItems.map((item, i) => (
             <div key={i} className="flex justify-between">
               <span className="text-muted-foreground">
-                {item.description} ({item.quantity} {item.unit} × {formatCurrency(item.unitPrice)})
+                {item.description}
+                {item.unit !== "flat" && ` (${item.quantity} ${item.unit} × ${formatCurrency(item.unitPrice)})`}
               </span>
-              <span className="font-medium">{formatCurrency(item.total)}</span>
+              <span className="font-medium tabular-nums">{formatCurrency(item.total)}</span>
             </div>
           ))}
         </div>
         <Separator className="my-3" />
-        <div className="flex justify-between font-semibold text-base">
-          <span>Total</span>
-          <span className="text-solar-orange text-lg">{formatCurrency(pricing.total)}</span>
+        <div className="space-y-1">
+          <div className="flex justify-between text-sm text-muted-foreground">
+            <span>Subtotal (costs)</span>
+            <span className="tabular-nums">{formatCurrency(pricing.subtotal)}</span>
+          </div>
+          <div className="flex justify-between text-sm text-muted-foreground">
+            <span>Gross profit ({pricing.profitPercent.toFixed(1)}%)</span>
+            <span className="tabular-nums">{formatCurrency(pricing.grossProfit)}</span>
+          </div>
         </div>
-        <p className="text-xs text-muted-foreground mt-2">
-          * Pricing uses placeholder rates. Final rates will be updated once the Solarponics Excel bid tool is reviewed.
-        </p>
+        <Separator className="my-3" />
+        <div className="flex justify-between font-bold text-base">
+          <span>Contract Total</span>
+          <span className="text-solar-orange text-lg tabular-nums">{formatCurrency(pricing.total)}</span>
+        </div>
+        <div className="mt-3 grid grid-cols-2 gap-4 text-sm text-muted-foreground">
+          <div>
+            <span className="font-medium text-foreground">Deposit (10%):</span>{" "}
+            <span className="tabular-nums">{formatCurrency(pricing.depositAmount)}</span>
+          </div>
+          <div>
+            <span className="font-medium text-foreground">Final Payment (90%):</span>{" "}
+            <span className="tabular-nums">{formatCurrency(pricing.finalPayment)}</span>
+          </div>
+        </div>
       </section>
     </div>
   );

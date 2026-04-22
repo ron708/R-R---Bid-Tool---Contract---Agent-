@@ -33,11 +33,23 @@ export async function POST(req: NextRequest) {
       attachmentType: body.attachmentType || null,
       attachmentCount: parseInt(body.attachmentCount) || null,
       workScope: body.workScope || "FULL_RR",
-      includePermit: body.includePermit ?? false,
-      includeInspection: body.includeInspection ?? false,
       notes: body.notes || null,
+      // Cost inputs
+      partsEstimate: parseFloat(body.partsEstimate) || 0,
+      morePartsEstimate: parseFloat(body.morePartsEstimate) || 0,
+      crewCount: parseInt(body.crewCount) || 2,
+      crewDays: parseFloat(body.crewDays) || 1,
+      milesFromJob: parseFloat(body.milesFromJob) || 0,
+      commissionAmount: parseFloat(body.commissionAmount) ?? 400,
+      subContractorCost: parseFloat(body.subContractorCost) || 0,
+      rackCost: parseFloat(body.rackCost) || 0,
+      permitFeeAmount: parseFloat(body.permitFeeAmount) || 0,
+      // Pricing outputs
       subtotal: pricing.subtotal,
       total: pricing.total,
+      grossProfit: pricing.grossProfit,
+      depositAmount: pricing.depositAmount,
+      finalPayment: pricing.finalPayment,
       lineItems: {
         create: pricing.lineItems.map((item) => ({
           description: item.description,

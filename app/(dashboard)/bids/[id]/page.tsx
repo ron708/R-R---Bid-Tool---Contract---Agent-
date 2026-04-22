@@ -77,20 +77,46 @@ export default async function BidDetailPage({ params }: { params: { id: string }
 
       {/* Pricing */}
       <Card>
-        <CardHeader><CardTitle className="text-base">Pricing</CardTitle></CardHeader>
-        <CardContent className="space-y-2 text-sm">
+        <CardHeader><CardTitle className="text-base">Pricing Breakdown</CardTitle></CardHeader>
+        <CardContent className="space-y-1.5 text-sm">
           {bid.lineItems.map((item) => (
             <div key={item.id} className="flex justify-between">
               <span className="text-muted-foreground">
-                {item.description} ({item.quantity} {item.unit} × {formatCurrency(item.unitPrice)})
+                {item.description}
+                {item.unit !== "flat" && ` (${item.quantity} ${item.unit} × ${formatCurrency(item.unitPrice)})`}
               </span>
-              <span>{formatCurrency(item.total)}</span>
+              <span className="tabular-nums">{formatCurrency(item.total)}</span>
             </div>
           ))}
           <Separator />
-          <div className="flex justify-between font-bold text-base">
-            <span>Total</span>
-            <span className="text-solar-orange">{formatCurrency(bid.total ?? 0)}</span>
+          <div className="flex justify-between text-muted-foreground">
+            <span>Subtotal (costs)</span>
+            <span className="tabular-nums">{formatCurrency(bid.subtotal ?? 0)}</span>
+          </div>
+          <div className="flex justify-between font-bold text-base pt-1">
+            <span>Contract Total</span>
+            <span className="text-solar-orange tabular-nums">{formatCurrency(bid.total ?? 0)}</span>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Payment Schedule */}
+      <Card>
+        <CardHeader><CardTitle className="text-base">Payment Schedule</CardTitle></CardHeader>
+        <CardContent className="space-y-3 text-sm">
+          <div className="flex justify-between items-center p-3 bg-muted rounded-lg">
+            <div>
+              <p className="font-semibold">Deposit — Due upon signing</p>
+              <p className="text-muted-foreground text-xs">10% of contract total</p>
+            </div>
+            <span className="text-lg font-bold tabular-nums">{formatCurrency(bid.depositAmount ?? 0)}</span>
+          </div>
+          <div className="flex justify-between items-center p-3 bg-muted rounded-lg">
+            <div>
+              <p className="font-semibold">Balance — Due upon completion</p>
+              <p className="text-muted-foreground text-xs">90% of contract total</p>
+            </div>
+            <span className="text-lg font-bold tabular-nums">{formatCurrency(bid.finalPayment ?? 0)}</span>
           </div>
         </CardContent>
       </Card>

@@ -105,27 +105,6 @@ export function StepRoofScope({ form, update }: Props) {
         </Select>
       </div>
 
-      <div className="flex gap-6">
-        <label className="flex items-center gap-2 cursor-pointer">
-          <input
-            type="checkbox"
-            className="h-4 w-4 rounded"
-            checked={form.includePermit}
-            onChange={(e) => update({ includePermit: e.target.checked })}
-          />
-          <span className="text-sm">Include Permit Fee</span>
-        </label>
-        <label className="flex items-center gap-2 cursor-pointer">
-          <input
-            type="checkbox"
-            className="h-4 w-4 rounded"
-            checked={form.includeInspection}
-            onChange={(e) => update({ includeInspection: e.target.checked })}
-          />
-          <span className="text-sm">Include Inspection Fee</span>
-        </label>
-      </div>
-
       <div className="space-y-2">
         <Label htmlFor="notes">Notes / Special Conditions</Label>
         <Textarea

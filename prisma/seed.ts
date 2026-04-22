@@ -4,59 +4,65 @@ import bcrypt from "bcryptjs";
 const prisma = new PrismaClient();
 
 async function main() {
-  // Global Solarponics config
+  // Global Solarponics config — real company info from contract form 25-003-A-SVC
   await prisma.solarponicsConfig.upsert({
     where: { id: "singleton" },
     update: {},
     create: {
       id: "singleton",
       companyName: "Solarponics Inc.",
-      licenseNumber: "",
-      address: "",
-      city: "",
+      licenseNumber: "CSLB#391670",
+      address: "4700 El Camino Real",
+      city: "Atascadero",
       state: "CA",
-      zip: "",
-      phone: "",
+      zip: "93422",
+      phone: "(805) 466-5595",
       email: "info@solarponics.com",
       website: "https://solarponics.com",
-      termsConditions: `TERMS AND CONDITIONS
+      termsConditions: `SOLAR PANEL REMOVE & REPLACE (R&R) — TERMS AND CONDITIONS
 
-1. SCOPE OF WORK: Solarponics Inc. will perform the solar system remove and replace (R&R) services as described in this proposal.
+1. SCOPE OF WORK: Solarponics Inc. will perform the solar system remove and replace (R&R) services as described in this agreement. Work will be performed by Solarponics technicians and/or its authorized Strategic Partner.
 
-2. PAYMENT: Payment is due upon completion of work unless otherwise agreed in writing.
+2. PAYMENT: A deposit of 10% of the total contract price is due upon signing. The remaining 90% balance is due upon completion of work. Payment is accepted by check, ACH, or credit card.
 
-3. WARRANTY: Labor warranty of 1 year from date of completion. Equipment warranty per manufacturer terms.
+3. WARRANTY: Solarponics Inc. warrants all labor performed under this agreement for a period of one (1) year from the date of completion. Equipment and component warranties are provided per manufacturer terms and are separate from this labor warranty.
 
-4. PERMITS: Permit fees, if included in this proposal, cover standard permit processing. Additional fees due to municipal requirements are the responsibility of the property owner.
+4. PERMITS: Permit fees, if included in this proposal, cover standard permit processing. Any additional fees imposed by local municipalities beyond standard permitting are the responsibility of the property owner.
 
-5. SITE CONDITIONS: Contractor is not responsible for pre-existing roof damage discovered during removal.
+5. SITE CONDITIONS: Solarponics Inc. is not responsible for pre-existing roof damage, wiring deficiencies, micro-cracking of panels, or equipment failures discovered during removal. Any additional work required will be quoted separately before proceeding.
 
-6. CANCELLATION: Cancellation within 72 hours of scheduled work date may result in a cancellation fee.
+6. PREEXISTING CONDITIONS: Customer acknowledges that solar equipment being removed may have pre-existing damage not caused by Solarponics or its Strategic Partner. A preexisting conditions inspection report will be provided upon request.
 
-7. GOVERNING LAW: This agreement shall be governed by the laws of the State of California.`,
+7. CANCELLATION: Customer has the right to cancel this contract within five (5) business days of signing without penalty (California Right to Cancel). Cancellation after five business days but before the scheduled work date may result in a cancellation fee of up to 20% of the contract value to cover mobilization costs.
+
+8. ACCESS: Customer agrees to provide safe, unobstructed access to the roof, attic (if applicable), and electrical systems on the scheduled work date. Failure to provide access may result in a rescheduling fee.
+
+9. PHOTOGRAPHS: Solarponics Inc. and/or its Strategic Partner will photograph the site before, during, and after work for quality assurance, documentation, and warranty purposes.
+
+10. HAZARDOUS CONDITIONS: If unsafe conditions are discovered on the job site (electrical hazards, structural concerns, etc.), Solarponics reserves the right to halt work until conditions are corrected by the appropriate contractor.
+
+11. GOVERNING LAW: This agreement shall be governed by the laws of the State of California. Any disputes arising under this agreement shall be resolved in San Luis Obispo County, California.
+
+12. ENTIRE AGREEMENT: This document, including any attached scope of work and pricing schedule, constitutes the entire agreement between the parties and supersedes all prior oral or written representations.
+
+©2025 Solarponics Inc. | 4700 El Camino Real, Atascadero, CA 93422 | (805) 466-5595 | CSLB#391670`,
     },
   });
 
-  // Default pricing config — PLACEHOLDER values to be replaced with actual Excel bid tool rates
+  // Default pricing config — real rates from Solarponics Excel bid tool (OVERHEAD COST SHEET)
   await prisma.defaultPricingConfig.upsert({
     where: { id: "default" },
     update: {},
     create: {
       id: "default",
-      // PLACEHOLDER RATES — replace after Excel bid tool review
-      panelRemoval: 35,
-      railRemovalPerFt: 2.5,
-      attachmentRemoval: 8,
-      panelInstall: 45,
-      railInstallPerFt: 3.5,
-      attachmentInstall: 12,
-      pitchAdderMedium: 5,
-      pitchAdderSteep: 15,
-      storyAdder: 8,
-      permitFee: 350,
-      inspectionFee: 150,
-      laborRatePerHour: 85,
-      travelFlatFee: 0,
+      inflationRate: 0.03,           // 3% of parts (material cost inflation buffer)
+      salesTaxRate: 0.0875,          // 8.75% CA sales tax on parts + inflation
+      freightMin: 75,                // minimum $75 freight / receiving charge
+      truckRatePerMile: 6.25,        // $6.25/mile truck expense
+      laborDailyRatePerPerson: 430,  // $430/person/day crew labor
+      warrantyReserveRate: 0.13,     // 13% of (parts + labor) for warranty reserve
+      liabilityInsuranceRate: 0.0922,// 9.22% of all other costs for liability insurance
+      profitMargin: 0.35,            // 35% target gross margin for service work
     },
   });
 

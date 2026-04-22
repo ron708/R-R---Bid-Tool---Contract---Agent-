@@ -9,9 +9,9 @@ import { Loader2, ChevronRight, ChevronLeft, Check } from "lucide-react";
 import { StepCustomer } from "./step-customer";
 import { StepSystem } from "./step-system";
 import { StepRoofScope } from "./step-roof-scope";
+import { StepCost } from "./step-cost";
 import { StepReview } from "./step-review";
-import { calculateBid, type PricingInputs } from "@/lib/pricing-engine";
-import type { DefaultPricingConfig } from "@prisma/client";
+import { calculateBid, DEFAULT_RATES, type PricingInputs, type RateTable } from "@/lib/pricing-engine";
 import { cn } from "@/lib/utils";
 
 export interface BidFormData {
@@ -32,16 +32,24 @@ export interface BidFormData {
   attachmentType: string;
   attachmentCount: string;
   workScope: string;
-  includePermit: boolean;
-  includeInspection: boolean;
   notes: string;
+  // Step 4: Cost Inputs
+  partsEstimate: number;
+  morePartsEstimate: number;
+  crewCount: number;
+  crewDays: number;
+  milesFromJob: number;
+  commissionAmount: number;
+  subContractorCost: number;
+  rackCost: number;
+  permitFeeAmount: number;
 }
 
-const STEPS = ["Customer", "System", "Roof & Scope", "Review"];
+const STEPS = ["Customer", "System", "Roof & Scope", "Cost Inputs", "Review"];
 
 interface Props {
   customers: { id: string; firstName: string; lastName: string; siteAddress: string; siteCity: string | null; email: string | null; phone: string | null }[];
-  defaultRates: DefaultPricingConfig | null;
+  defaultRates: Partial<RateTable> | null;
 }
 
 const defaultForm: BidFormData = {
@@ -59,9 +67,16 @@ const defaultForm: BidFormData = {
   attachmentType: "",
   attachmentCount: "",
   workScope: "FULL_RR",
-  includePermit: false,
-  includeInspection: false,
   notes: "",
+  partsEstimate: 0,
+  morePartsEstimate: 0,
+  crewCount: 2,
+  crewDays: 1,
+  milesFromJob: 0,
+  commissionAmount: 400,
+  subContractorCost: 0,
+  rackCost: 0,
+  permitFeeAmount: 0,
 };
 
 export function BidFormWizard({ customers, defaultRates }: Props) {
@@ -72,23 +87,24 @@ export function BidFormWizard({ customers, defaultRates }: Props) {
 
   const update = (patch: Partial<BidFormData>) => setForm((f) => ({ ...f, ...patch }));
 
-  const rates = defaultRates ?? {
-    panelRemoval: 35, railRemovalPerFt: 2.5, attachmentRemoval: 8,
-    panelInstall: 45, railInstallPerFt: 3.5, attachmentInstall: 12,
-    pitchAdderMedium: 5, pitchAdderSteep: 15, storyAdder: 8,
-    permitFee: 350, inspectionFee: 150, laborRatePerHour: 85, travelFlatFee: 0,
+  const rates: RateTable = {
+    ...DEFAULT_RATES,
+    ...Object.fromEntries(
+      Object.entries(defaultRates ?? {}).filter(([, v]) => v != null)
+    ),
   };
 
   const pricingInputs: PricingInputs = {
     panelCount: form.panelCount,
-    railLinearFt: parseFloat(form.railLinearFt) || undefined,
-    attachmentCount: parseInt(form.attachmentCount) || undefined,
-    attachmentType: (form.attachmentType as any) || undefined,
-    pitchCategory: (form.pitchCategory as any) || "LOW",
-    stories: form.stories,
-    workScope: (form.workScope as any) || "FULL_RR",
-    includePermit: form.includePermit,
-    includeInspection: form.includeInspection,
+    partsEstimate: form.partsEstimate,
+    morePartsEstimate: form.morePartsEstimate,
+    milesFromJob: form.milesFromJob,
+    crewCount: form.crewCount,
+    crewDays: form.crewDays,
+    commissionAmount: form.commissionAmount,
+    subContractorCost: form.subContractorCost,
+    rackCost: form.rackCost,
+    permitFee: form.permitFeeAmount,
   };
 
   const pricing = calculateBid(pricingInputs, rates);
@@ -122,19 +138,19 @@ export function BidFormWizard({ customers, defaultRates }: Props) {
   return (
     <div className="space-y-6">
       {/* Step indicators */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 overflow-x-auto pb-1">
         {STEPS.map((label, i) => (
-          <div key={i} className="flex items-center gap-2 flex-1">
+          <div key={i} className="flex items-center gap-2 flex-1 min-w-0">
             <div className={cn(
               "flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold shrink-0",
               i < step ? "bg-green-500 text-white" : i === step ? "bg-primary text-white" : "bg-muted text-muted-foreground"
             )}>
               {i < step ? <Check className="h-4 w-4" /> : i + 1}
             </div>
-            <span className={cn("text-sm hidden sm:block", i === step ? "font-semibold" : "text-muted-foreground")}>
+            <span className={cn("text-sm hidden sm:block truncate", i === step ? "font-semibold" : "text-muted-foreground")}>
               {label}
             </span>
-            {i < STEPS.length - 1 && <div className="flex-1 h-px bg-border" />}
+            {i < STEPS.length - 1 && <div className="flex-1 h-px bg-border shrink-0 min-w-[8px]" />}
           </div>
         ))}
       </div>
@@ -146,7 +162,8 @@ export function BidFormWizard({ customers, defaultRates }: Props) {
           {step === 0 && <StepCustomer form={form} update={update} customers={customers} />}
           {step === 1 && <StepSystem form={form} update={update} />}
           {step === 2 && <StepRoofScope form={form} update={update} />}
-          {step === 3 && <StepReview form={form} customers={customers} pricing={pricing} />}
+          {step === 3 && <StepCost form={form} update={update} />}
+          {step === 4 && <StepReview form={form} customers={customers} pricing={pricing} />}
         </CardContent>
       </Card>
 

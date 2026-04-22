@@ -83,28 +83,17 @@ model SolarponicsConfig {
 // ─── Global Default Pricing ───────────────────────────────────────────────────
 
 model DefaultPricingConfig {
-  id               String  @id @default(cuid())
-  // Removal rates
-  panelRemoval     Float   @default(0)
-  railRemovalPerFt Float   @default(0)
-  attachmentRemoval Float  @default(0)
-  // Install rates
-  panelInstall     Float   @default(0)
-  railInstallPerFt Float   @default(0)
-  attachmentInstall Float  @default(0)
-  // Pitch adders (per panel)
-  pitchAdderMedium Float   @default(0)
-  pitchAdderSteep  Float   @default(0)
-  // Story adder (per panel, applied for 2+ stories)
-  storyAdder       Float   @default(0)
-  // Flat fees
-  permitFee        Float   @default(0)
-  inspectionFee    Float   @default(0)
-  // Labor
-  laborRatePerHour Float   @default(0)
-  // Misc
-  travelFlatFee    Float   @default(0)
-  updatedAt        DateTime @updatedAt
+  id                      String   @id @default(cuid())
+  // Cost-plus margin model rates (see lib/pricing-engine.ts)
+  inflationRate           Float    @default(0.03)    // % of parts
+  salesTaxRate            Float    @default(0.0875)  // CA: 8.75% of parts+inflation
+  freightMin              Float    @default(75)      // minimum freight charge
+  truckRatePerMile        Float    @default(6.25)    // $/mile round-trip
+  laborDailyRatePerPerson Float    @default(430)     // $/person/day
+  warrantyReserveRate     Float    @default(0.13)    // 13% of parts+labor
+  liabilityInsuranceRate  Float    @default(0.0922)  // 9.22% of all other costs
+  profitMargin            Float    @default(0.35)    // 35% service margin
+  updatedAt               DateTime @updatedAt
 }
 
 // ─── Contractor (Roofing Partner) ─────────────────────────────────────────────
@@ -194,16 +183,26 @@ model Bid {
 
   // Work scope
   workScope       WorkScope     @default(FULL_RR)
-  includePermit   Boolean       @default(false)
-  includeInspection Boolean     @default(false)
   notes           String?       @db.Text
 
-  // Pricing
+  // Cost inputs (from estimator — drives the cost-plus pricing engine)
+  partsEstimate       Float  @default(0)   // actual hardware cost
+  morePartsEstimate   Float  @default(0)   // misc parts
+  crewCount           Int    @default(2)
+  crewDays            Float  @default(1)
+  milesFromJob        Float  @default(0)
+  commissionAmount    Float  @default(400)
+  subContractorCost   Float  @default(0)
+  rackCost            Float  @default(0)
+  permitFeeAmount     Float  @default(0)
+
+  // Pricing outputs
   lineItems       BidLineItem[]
-  subtotal        Float?
-  taxRate         Float?        @default(0)
-  taxAmount       Float?
-  total           Float?
+  subtotal        Float?        // total costs before margin
+  total           Float?        // contract price after 35% margin
+  grossProfit     Float?
+  depositAmount   Float?
+  finalPayment    Float?
 
   // Proposal / contract
   proposalUrl     String?
