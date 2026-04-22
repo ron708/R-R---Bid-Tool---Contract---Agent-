@@ -1,0 +1,260 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Enums ────────────────────────────────────────────────────────────────────
+
+enum UserRole {
+  SOLARPONICS_ADMIN
+  PARTNER_OWNER
+  PARTNER_ESTIMATOR
+}
+
+enum BidStatus {
+  DRAFT
+  SENT
+  SIGNED
+  COMPLETE
+  VOIDED
+}
+
+enum RoofType {
+  COMP_SHINGLE
+  TILE
+  METAL
+  FLAT_TPO
+  FLAT_EPDM
+  FLAT_MOD_BIT
+}
+
+enum PitchCategory {
+  LOW
+  MEDIUM
+  STEEP
+}
+
+enum InverterType {
+  STRING
+  MICROINVERTER
+  POWER_OPTIMIZER
+}
+
+enum AttachmentType {
+  LAG_BOLT
+  SEAM_CLAMP
+  S5_CLAMP
+  TILE_HOOK
+  FLAT_ROOF_BALLAST
+}
+
+enum WorkScope {
+  REMOVAL_ONLY
+  INSTALL_ONLY
+  FULL_RR
+}
+
+// ─── Solarponics Global Config ────────────────────────────────────────────────
+
+model SolarponicsConfig {
+  id              String   @id @default(cuid())
+  companyName     String   @default("Solarponics Inc.")
+  licenseNumber   String?
+  address         String?
+  city            String?
+  state           String?
+  zip             String?
+  phone           String?
+  email           String?
+  website         String?
+  logoUrl         String?
+  termsConditions String?  @db.Text
+  // Adobe Sign OAuth tokens (admin-managed)
+  adobeSignAccessToken  String?
+  adobeSignRefreshToken String?
+  adobeSignTokenExpiry  DateTime?
+  updatedAt       DateTime @updatedAt
+}
+
+// ─── Global Default Pricing ───────────────────────────────────────────────────
+
+model DefaultPricingConfig {
+  id               String  @id @default(cuid())
+  // Removal rates
+  panelRemoval     Float   @default(0)
+  railRemovalPerFt Float   @default(0)
+  attachmentRemoval Float  @default(0)
+  // Install rates
+  panelInstall     Float   @default(0)
+  railInstallPerFt Float   @default(0)
+  attachmentInstall Float  @default(0)
+  // Pitch adders (per panel)
+  pitchAdderMedium Float   @default(0)
+  pitchAdderSteep  Float   @default(0)
+  // Story adder (per panel, applied for 2+ stories)
+  storyAdder       Float   @default(0)
+  // Flat fees
+  permitFee        Float   @default(0)
+  inspectionFee    Float   @default(0)
+  // Labor
+  laborRatePerHour Float   @default(0)
+  // Misc
+  travelFlatFee    Float   @default(0)
+  updatedAt        DateTime @updatedAt
+}
+
+// ─── Contractor (Roofing Partner) ─────────────────────────────────────────────
+
+model Contractor {
+  id            String   @id @default(cuid())
+  name          String
+  email         String   @unique
+  phone         String?
+  address       String?
+  city          String?
+  state         String?
+  zip           String?
+  licenseNumber String?
+  active        Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  users         User[]
+  customers     Customer[]
+  bids          Bid[]
+  integration   ContractorIntegration?
+}
+
+// ─── User ─────────────────────────────────────────────────────────────────────
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  password      String
+  role          UserRole  @default(PARTNER_ESTIMATOR)
+  contractorId  String?
+  contractor    Contractor? @relation(fields: [contractorId], references: [id])
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+// ─── Customer ─────────────────────────────────────────────────────────────────
+
+model Customer {
+  id           String     @id @default(cuid())
+  firstName    String
+  lastName     String
+  email        String?
+  phone        String?
+  siteAddress  String
+  siteCity     String?
+  siteState    String?
+  siteZip      String?
+  contractorId String
+  contractor   Contractor @relation(fields: [contractorId], references: [id])
+  bids         Bid[]
+  // Pipedrive
+  pipedrivePersonId String?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+}
+
+// ─── Bid ──────────────────────────────────────────────────────────────────────
+
+model Bid {
+  id           String    @id @default(cuid())
+  bidNumber    String    @unique
+  status       BidStatus @default(DRAFT)
+
+  contractorId String
+  contractor   Contractor @relation(fields: [contractorId], references: [id])
+  customerId   String
+  customer     Customer   @relation(fields: [customerId], references: [id])
+
+  // Solar system
+  panelCount      Int
+  panelBrand      String?
+  panelModel      String?
+  systemSizeKw    Float?
+  inverterType    InverterType?
+  inverterBrand   String?
+
+  // Roof / mounting
+  roofType        RoofType?
+  pitchCategory   PitchCategory?
+  stories         Int           @default(1)
+  railLinearFt    Float?
+  attachmentType  AttachmentType?
+  attachmentCount Int?
+
+  // Work scope
+  workScope       WorkScope     @default(FULL_RR)
+  includePermit   Boolean       @default(false)
+  includeInspection Boolean     @default(false)
+  notes           String?       @db.Text
+
+  // Pricing
+  lineItems       BidLineItem[]
+  subtotal        Float?
+  taxRate         Float?        @default(0)
+  taxAmount       Float?
+  total           Float?
+
+  // Proposal / contract
+  proposalUrl     String?
+  adobeSignAgreementId String?
+  signedAt        DateTime?
+
+  // Pipedrive
+  pipedriveDealId String?
+
+  // Photos
+  photos          BidPhoto[]
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+// ─── Bid Line Items ───────────────────────────────────────────────────────────
+
+model BidLineItem {
+  id          String  @id @default(cuid())
+  bidId       String
+  bid         Bid     @relation(fields: [bidId], references: [id], onDelete: Cascade)
+  sortOrder   Int     @default(0)
+  description String
+  quantity    Float
+  unit        String
+  unitPrice   Float
+  total       Float
+}
+
+// ─── Bid Photos ───────────────────────────────────────────────────────────────
+
+model BidPhoto {
+  id          String   @id @default(cuid())
+  bidId       String
+  bid         Bid      @relation(fields: [bidId], references: [id], onDelete: Cascade)
+  storagePath String
+  publicUrl   String
+  caption     String?
+  uploadedAt  DateTime @default(now())
+}
+
+// ─── Contractor Integrations ─────────────────────────────────────────────────
+
+model ContractorIntegration {
+  id              String     @id @default(cuid())
+  contractorId    String     @unique
+  contractor      Contractor @relation(fields: [contractorId], references: [id])
+  // Pipedrive
+  pipedriveApiKey String?
+  pipedrivePipelineId String?
+  pipedriveStageId    String?
+  updatedAt       DateTime   @updatedAt
+}
