@@ -71,14 +71,17 @@ export function StepReview({ form, customers, pricing }: Props) {
         <p className="font-semibold text-base mb-2">Cost Inputs</p>
         <div className="grid grid-cols-2 gap-x-8 gap-y-1">
           <div><span className="text-muted-foreground">Parts:</span> {formatCurrency(form.partsEstimate)}</div>
-          {form.morePartsEstimate > 0 && <div><span className="text-muted-foreground">Add'l Parts:</span> {formatCurrency(form.morePartsEstimate)}</div>}
-          {form.rackCost > 0 && <div><span className="text-muted-foreground">Rack/Rail:</span> {formatCurrency(form.rackCost)}</div>}
-          <div><span className="text-muted-foreground">Crew:</span> {form.crewCount} people × {form.crewDays} day{form.crewDays !== 1 ? "s" : ""}</div>
+          <div><span className="text-muted-foreground">Crew:</span> {form.crewCount} × {form.crewDays} days</div>
           {form.milesFromJob > 0 && <div><span className="text-muted-foreground">Miles:</span> {form.milesFromJob} mi</div>}
-          {form.commissionAmount > 0 && <div><span className="text-muted-foreground">Commission:</span> {formatCurrency(form.commissionAmount)}</div>}
-          {form.subContractorCost > 0 && <div><span className="text-muted-foreground">Sub-Contractor:</span> {formatCurrency(form.subContractorCost)}</div>}
-          {form.permitFeeAmount > 0 && <div><span className="text-muted-foreground">Permit Fee:</span> {formatCurrency(form.permitFeeAmount)}</div>}
+          <div><span className="text-muted-foreground">Permit:</span> {form.includePermit ? `Yes — $250` : "No"}</div>
+          <div><span className="text-muted-foreground">Rack/Rail:</span> {form.includeRack ? `Yes — ${formatCurrency(form.panelCount * 18)}` : "No"}</div>
+          {form.subContractorCost > 0 && (
+            <div><span className="text-muted-foreground">Sub-Contractor:</span> {formatCurrency(form.subContractorCost)} <span className="text-xs">(internal)</span></div>
+          )}
         </div>
+        {form.saveTheDeal && (
+          <p className="mt-2 text-sm font-medium text-amber-600">Save the Deal — 30% margin applied</p>
+        )}
       </section>
 
       <Separator />
@@ -87,10 +90,11 @@ export function StepReview({ form, customers, pricing }: Props) {
         <p className="font-semibold text-base mb-3">Pricing Breakdown</p>
         <div className="space-y-1.5">
           {pricing.lineItems.map((item, i) => (
-            <div key={i} className="flex justify-between">
+            <div key={i} className={`flex justify-between ${item.internal ? "opacity-50 italic" : ""}`}>
               <span className="text-muted-foreground">
                 {item.description}
                 {item.unit !== "flat" && ` (${item.quantity} ${item.unit} × ${formatCurrency(item.unitPrice)})`}
+                {item.internal && " (internal)"}
               </span>
               <span className="font-medium tabular-nums">{formatCurrency(item.total)}</span>
             </div>

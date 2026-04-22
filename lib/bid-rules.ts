@@ -10,6 +10,10 @@ export const CREW_COUNT = 2;               // always 2-person crew
 export const PARTS_PANEL_MULTIPLIER = 1.5; // qty factor: each panel = 1.5 units
 export const PARTS_UNIT_COST = 35;         // $/unit of parts
 
+export const PERMIT_FEE = 250;             // flat permit fee when required
+export const RACK_RATE_PER_PANEL = 18;     // $/panel for rack/rail system
+export const SAVE_THE_DEAL_MARGIN = 0.30;  // reduced margin (vs standard 0.35)
+
 /** Parts estimate = panelCount × 1.5 × $35 */
 export function calcPartsEstimate(panelCount: number): number {
   return panelCount * PARTS_PANEL_MULTIPLIER * PARTS_UNIT_COST;

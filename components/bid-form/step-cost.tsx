@@ -2,19 +2,64 @@
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, MapPin, Users, Wrench } from "lucide-react";
+import { Loader2, MapPin, Users, Wrench, Tag } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import type { BidFormData } from "./bid-form-wizard";
 
 interface Props {
   form: BidFormData;
   update: (patch: Partial<BidFormData>) => void;
   milesLoading: boolean;
+  permitFeeAmount: number; // derived: $250 or $0
+  rackCost: number;        // derived: panels × $18 or $0
 }
 
-export function StepCost({ form, update, milesLoading }: Props) {
+function YesNoToggle({
+  value,
+  onChange,
+  yesLabel = "Yes",
+  noLabel = "No",
+}: {
+  value: boolean;
+  onChange: (v: boolean) => void;
+  yesLabel?: string;
+  noLabel?: string;
+}) {
   return (
-    <div className="space-y-6">
+    <div className="flex rounded-md border overflow-hidden w-fit">
+      <button
+        type="button"
+        onClick={() => onChange(false)}
+        className={cn(
+          "px-4 py-1.5 text-sm font-medium transition-colors",
+          !value
+            ? "bg-primary text-primary-foreground"
+            : "bg-background text-muted-foreground hover:bg-muted"
+        )}
+      >
+        {noLabel}
+      </button>
+      <button
+        type="button"
+        onClick={() => onChange(true)}
+        className={cn(
+          "px-4 py-1.5 text-sm font-medium transition-colors border-l",
+          value
+            ? "bg-primary text-primary-foreground"
+            : "bg-background text-muted-foreground hover:bg-muted"
+        )}
+      >
+        {yesLabel}
+      </button>
+    </div>
+  );
+}
+
+export function StepCost({ form, update, milesLoading, permitFeeAmount, rackCost }: Props) {
+  return (
+    <div className="space-y-7">
+
       {/* Auto-calculated summary (read-only) */}
       <div>
         <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
@@ -36,16 +81,15 @@ export function StepCost({ form, update, milesLoading }: Props) {
           <div className="bg-muted rounded-lg p-3 text-center">
             <MapPin className="h-4 w-4 mx-auto mb-1 text-muted-foreground" />
             <p className="text-xs text-muted-foreground">Distance</p>
-            {milesLoading ? (
-              <Loader2 className="h-4 w-4 animate-spin mx-auto mt-1" />
-            ) : (
-              <p className="font-semibold text-sm">{form.milesFromJob} mi</p>
-            )}
+            {milesLoading
+              ? <Loader2 className="h-4 w-4 animate-spin mx-auto mt-1" />
+              : <p className="font-semibold text-sm">{form.milesFromJob} mi</p>
+            }
           </div>
         </div>
       </div>
 
-      {/* Miles — auto-filled, user can override */}
+      {/* Miles override */}
       <div className="space-y-1">
         <Label htmlFor="milesFromJob">One-Way Miles from Shop</Label>
         <div className="relative">
@@ -62,53 +106,89 @@ export function StepCost({ form, update, milesLoading }: Props) {
             className={milesLoading ? "pl-9" : ""}
           />
         </div>
-        <p className="text-xs text-muted-foreground">
-          Auto-calculated from job site address. Override if needed.
-        </p>
+        <p className="text-xs text-muted-foreground">Auto-calculated from job address. Override if needed.</p>
       </div>
 
-      {/* Optional manual inputs */}
-      <div>
-        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">
-          Additional Costs (enter 0 if not applicable)
-        </p>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="space-y-1">
-            <Label htmlFor="permitFeeAmount">Permit Fee ($)</Label>
-            <Input
-              id="permitFeeAmount"
-              type="number"
-              step="0.01"
-              min="0"
-              value={form.permitFeeAmount}
-              onChange={(e) => update({ permitFeeAmount: parseFloat(e.target.value) || 0 })}
-            />
+      {/* Permit Fee */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <div>
+            <Label>Permit Required?</Label>
+            <p className="text-xs text-muted-foreground mt-0.5">Adds a flat $250 permit fee</p>
           </div>
-          <div className="space-y-1">
-            <Label htmlFor="rackCost">Rack / Rail Cost ($)</Label>
-            <Input
-              id="rackCost"
-              type="number"
-              step="0.01"
-              min="0"
-              value={form.rackCost}
-              onChange={(e) => update({ rackCost: parseFloat(e.target.value) || 0 })}
-            />
-            <p className="text-xs text-muted-foreground">From management</p>
-          </div>
-          <div className="space-y-1">
-            <Label htmlFor="subContractorCost">Sub-Contractor ($)</Label>
-            <Input
-              id="subContractorCost"
-              type="number"
-              step="0.01"
-              min="0"
-              value={form.subContractorCost}
-              onChange={(e) => update({ subContractorCost: parseFloat(e.target.value) || 0 })}
-            />
+          <div className="flex items-center gap-3">
+            {form.includePermit && (
+              <span className="text-sm font-semibold text-solar-orange">+{formatCurrency(permitFeeAmount)}</span>
+            )}
+            <YesNoToggle value={form.includePermit} onChange={(v) => update({ includePermit: v })} />
           </div>
         </div>
       </div>
+
+      {/* Rack / Rail */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <div>
+            <Label>Rack / Rail System Required?</Label>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Adds $18 × {form.panelCount} panels = {formatCurrency(form.panelCount * 18)}
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            {form.includeRack && (
+              <span className="text-sm font-semibold text-solar-orange">+{formatCurrency(rackCost)}</span>
+            )}
+            <YesNoToggle value={form.includeRack} onChange={(v) => update({ includeRack: v })} />
+          </div>
+        </div>
+      </div>
+
+      {/* Sub-Contractor */}
+      <div className="space-y-1">
+        <Label htmlFor="subContractorCost">Sub-Contractor Cost ($)</Label>
+        <Input
+          id="subContractorCost"
+          type="number"
+          step="0.01"
+          min="0"
+          value={form.subContractorCost}
+          onChange={(e) => update({ subContractorCost: parseFloat(e.target.value) || 0 })}
+          placeholder="0"
+        />
+        <p className="text-xs text-muted-foreground">
+          Included in contract total but not shown on customer proposal.
+        </p>
+      </div>
+
+      {/* Save the Deal */}
+      <div className={cn(
+        "rounded-lg border-2 p-4 transition-colors",
+        form.saveTheDeal
+          ? "border-amber-400 bg-amber-50 dark:bg-amber-950/20"
+          : "border-border"
+      )}>
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex items-start gap-2">
+            <Tag className={cn("h-5 w-5 mt-0.5 shrink-0", form.saveTheDeal ? "text-amber-600" : "text-muted-foreground")} />
+            <div>
+              <p className={cn("font-semibold text-sm", form.saveTheDeal && "text-amber-700 dark:text-amber-400")}>
+                Save the Deal
+              </p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Reduces margin from 35% → 30% to close a price-sensitive job.
+                Use only when needed.
+              </p>
+            </div>
+          </div>
+          <YesNoToggle
+            value={form.saveTheDeal}
+            onChange={(v) => update({ saveTheDeal: v })}
+            yesLabel="30%"
+            noLabel="35%"
+          />
+        </div>
+      </div>
+
     </div>
   );
 }

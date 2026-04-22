@@ -126,6 +126,8 @@ export function ProposalDocument({ bid, config }: Props) {
   const siteAddress = [bid.customer.siteAddress, bid.customer.siteCity, bid.customer.siteState, bid.customer.siteZip].filter(Boolean).join(", ");
   const depositAmt = bid.depositAmount ?? (bid.total ? bid.total * 0.10 : 0);
   const finalAmt = bid.finalPayment ?? (bid.total ? bid.total * 0.90 : 0);
+  // Filter out internal items (e.g. sub-contractor cost) from customer-facing document
+  const visibleLineItems = bid.lineItems.filter((item) => !item.internal);
 
   return (
     <Document>
@@ -197,7 +199,7 @@ export function ProposalDocument({ bid, config }: Props) {
             <Text style={{ ...s.tableHeadText, ...s.tQty }}>Qty / Unit</Text>
             <Text style={{ ...s.tableHeadText, ...s.tAmt }}>Amount</Text>
           </View>
-          {bid.lineItems.map((item, i) => (
+          {visibleLineItems.map((item, i) => (
             <View key={i} style={{ ...s.tableRow, backgroundColor: i % 2 === 0 ? "white" : "#f9fafb" }}>
               <Text style={s.tDesc}>{item.description}</Text>
               <Text style={{ ...s.tQty, color: GRAY }}>{item.unit === "flat" ? "—" : `${item.quantity} ${item.unit}`}</Text>

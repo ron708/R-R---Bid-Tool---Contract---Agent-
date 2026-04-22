@@ -58,6 +58,7 @@ export interface BidLineItemInput {
   unitPrice: number;
   total: number;
   sortOrder: number;
+  internal?: boolean; // true = excluded from customer-facing PDF
 }
 
 export interface PricingResult {
@@ -74,9 +75,15 @@ export function calculateBid(inputs: PricingInputs, rates: RateTable): PricingRe
   const items: BidLineItemInput[] = [];
   let order = 0;
 
-  const addItem = (description: string, quantity: number, unit: string, unitPrice: number): number => {
+  const addItem = (
+    description: string,
+    quantity: number,
+    unit: string,
+    unitPrice: number,
+    internal = false
+  ): number => {
     const total = parseFloat((quantity * unitPrice).toFixed(2));
-    items.push({ description, quantity, unit, unitPrice, total, sortOrder: order++ });
+    items.push({ description, quantity, unit, unitPrice, total, sortOrder: order++, internal });
     return total;
   };
 
@@ -113,9 +120,9 @@ export function calculateBid(inputs: PricingInputs, rates: RateTable): PricingRe
   const rackCost = inputs.rackCost || 0;
   if (rackCost > 0) addItem("Rack / Rail System", 1, "flat", rackCost);
 
-  // ── Sub Contractor ────────────────────────────────────────────────────────
+  // ── Sub Contractor (internal — baked into total, hidden from customer PDF) ──
   const subCost = inputs.subContractorCost || 0;
-  if (subCost > 0) addItem("Sub Contractor", 1, "flat", subCost);
+  if (subCost > 0) addItem("Sub Contractor", 1, "flat", subCost, true);
 
   // ── Commission ────────────────────────────────────────────────────────────
   const commission = inputs.commissionAmount || 0;

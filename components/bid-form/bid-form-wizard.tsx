@@ -12,7 +12,14 @@ import { StepRoofScope } from "./step-roof-scope";
 import { StepCost } from "./step-cost";
 import { StepReview } from "./step-review";
 import { calculateBid, DEFAULT_RATES, type PricingInputs, type RateTable } from "@/lib/pricing-engine";
-import { calcBidDefaults, COMMISSION_AMOUNT, CREW_COUNT } from "@/lib/bid-rules";
+import {
+  calcBidDefaults,
+  COMMISSION_AMOUNT,
+  CREW_COUNT,
+  PERMIT_FEE,
+  RACK_RATE_PER_PANEL,
+  SAVE_THE_DEAL_MARGIN,
+} from "@/lib/bid-rules";
 import { cn } from "@/lib/utils";
 
 export interface BidFormData {
@@ -34,16 +41,20 @@ export interface BidFormData {
   attachmentCount: string;
   workScope: string;
   notes: string;
-  // Step 4: Cost Inputs (mostly auto-calculated — only miles/permit/rack/sub are user-editable)
-  partsEstimate: number;       // auto: panelCount × 1.5 × $35
-  morePartsEstimate: number;   // always 0
-  crewCount: number;           // always 2
-  crewDays: number;            // auto: by panel count + roof type + stories
-  commissionAmount: number;    // always $400, not shown to user
-  milesFromJob: number;        // auto-calculated from job address, user can override
-  subContractorCost: number;
-  rackCost: number;
-  permitFeeAmount: number;
+  // Step 4: Cost Inputs
+  // Auto-calculated (hidden from UI, set by effects):
+  partsEstimate: number;     // panels × 1.5 × $35
+  morePartsEstimate: number; // always 0
+  crewCount: number;         // always 2
+  crewDays: number;          // by panels + roof + stories
+  commissionAmount: number;  // always $400
+  milesFromJob: number;      // auto-fetched from address, user can override
+  // Toggles (user-visible):
+  includePermit: boolean;    // Yes → $250
+  includeRack: boolean;      // Yes → panelCount × $18
+  subContractorCost: number; // partner-only; hidden from customer PDF
+  // Deal option:
+  saveTheDeal: boolean;      // true → 30% margin instead of 35%
 }
 
 const STEPS = ["Customer", "System", "Roof & Scope", "Cost Inputs", "Review"];
@@ -81,16 +92,16 @@ const defaultForm: BidFormData = {
   attachmentCount: "",
   workScope: "FULL_RR",
   notes: "",
-  // Auto-calculated defaults
   partsEstimate: 0,
   morePartsEstimate: 0,
   crewCount: CREW_COUNT,
   crewDays: 1.3,
   commissionAmount: COMMISSION_AMOUNT,
   milesFromJob: 0,
+  includePermit: false,
+  includeRack: false,
   subContractorCost: 0,
-  rackCost: 0,
-  permitFeeAmount: 0,
+  saveTheDeal: false,
 };
 
 export function BidFormWizard({ customers, defaultRates }: Props) {
@@ -133,32 +144,39 @@ export function BidFormWizard({ customers, defaultRates }: Props) {
         }
       })
       .catch(() => {})
-      .finally(() => {
-        if (!cancelled) setMilesLoading(false);
-      });
+      .finally(() => { if (!cancelled) setMilesLoading(false); });
 
     return () => { cancelled = true; };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form.customerId]);
 
-  const rates: RateTable = {
+  // ── Derived values for pricing ────────────────────────────────────────────────
+  const permitFeeAmount = form.includePermit ? PERMIT_FEE : 0;
+  const rackCost = form.includeRack ? form.panelCount * RACK_RATE_PER_PANEL : 0;
+
+  const baseRates: RateTable = {
     ...DEFAULT_RATES,
     ...Object.fromEntries(
       Object.entries(defaultRates ?? {}).filter(([, v]) => v != null)
     ),
   };
 
+  const rates: RateTable = {
+    ...baseRates,
+    profitMargin: form.saveTheDeal ? SAVE_THE_DEAL_MARGIN : baseRates.profitMargin,
+  };
+
   const pricingInputs: PricingInputs = {
     panelCount: form.panelCount,
     partsEstimate: form.partsEstimate,
-    morePartsEstimate: form.morePartsEstimate,
+    morePartsEstimate: 0,
     milesFromJob: form.milesFromJob,
     crewCount: form.crewCount,
     crewDays: form.crewDays,
     commissionAmount: form.commissionAmount,
     subContractorCost: form.subContractorCost,
-    rackCost: form.rackCost,
-    permitFee: form.permitFeeAmount,
+    rackCost,
+    permitFee: permitFeeAmount,
   };
 
   const pricing = calculateBid(pricingInputs, rates);
@@ -169,7 +187,13 @@ export function BidFormWizard({ customers, defaultRates }: Props) {
       const res = await fetch("/api/bids", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, pricing }),
+        body: JSON.stringify({
+          ...form,
+          permitFeeAmount,
+          rackCost,
+          saveTheDeal: form.saveTheDeal,
+          pricing,
+        }),
       });
 
       if (!res.ok) throw new Error("Failed to save bid");
@@ -216,7 +240,15 @@ export function BidFormWizard({ customers, defaultRates }: Props) {
           {step === 0 && <StepCustomer form={form} update={update} customers={customers} />}
           {step === 1 && <StepSystem form={form} update={update} />}
           {step === 2 && <StepRoofScope form={form} update={update} />}
-          {step === 3 && <StepCost form={form} update={update} milesLoading={milesLoading} />}
+          {step === 3 && (
+            <StepCost
+              form={form}
+              update={update}
+              milesLoading={milesLoading}
+              permitFeeAmount={permitFeeAmount}
+              rackCost={rackCost}
+            />
+          )}
           {step === 4 && <StepReview form={form} customers={customers} pricing={pricing} />}
         </CardContent>
       </Card>

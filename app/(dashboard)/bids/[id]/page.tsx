@@ -77,9 +77,18 @@ export default async function BidDetailPage({ params }: { params: { id: string }
 
       {/* Pricing */}
       <Card>
-        <CardHeader><CardTitle className="text-base">Pricing Breakdown</CardTitle></CardHeader>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-base">Pricing Breakdown</CardTitle>
+            {bid.saveTheDeal && (
+              <span className="text-xs font-medium bg-amber-100 text-amber-700 px-2 py-1 rounded-full">
+                Save the Deal — 30% margin
+              </span>
+            )}
+          </div>
+        </CardHeader>
         <CardContent className="space-y-1.5 text-sm">
-          {bid.lineItems.map((item) => (
+          {bid.lineItems.filter(i => !i.internal).map((item) => (
             <div key={item.id} className="flex justify-between">
               <span className="text-muted-foreground">
                 {item.description}
@@ -88,6 +97,12 @@ export default async function BidDetailPage({ params }: { params: { id: string }
               <span className="tabular-nums">{formatCurrency(item.total)}</span>
             </div>
           ))}
+          {bid.subContractorCost > 0 && (
+            <div className="flex justify-between text-muted-foreground border-t pt-1.5 mt-1.5 border-dashed">
+              <span className="italic">Sub-Contractor (internal)</span>
+              <span className="tabular-nums">{formatCurrency(bid.subContractorCost)}</span>
+            </div>
+          )}
           <Separator />
           <div className="flex justify-between text-muted-foreground">
             <span>Subtotal (costs)</span>

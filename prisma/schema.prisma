@@ -186,15 +186,17 @@ model Bid {
   notes           String?       @db.Text
 
   // Cost inputs (from estimator — drives the cost-plus pricing engine)
-  partsEstimate       Float  @default(0)   // actual hardware cost
-  morePartsEstimate   Float  @default(0)   // misc parts
+  partsEstimate       Float  @default(0)   // auto: panels × 1.5 × $35
+  morePartsEstimate   Float  @default(0)   // always 0
   crewCount           Int    @default(2)
   crewDays            Float  @default(1)
   milesFromJob        Float  @default(0)
-  commissionAmount    Float  @default(400)
-  subContractorCost   Float  @default(0)
-  rackCost            Float  @default(0)
-  permitFeeAmount     Float  @default(0)
+  commissionAmount    Float  @default(400) // always $400, hidden from partner UI
+  subContractorCost   Float  @default(0)  // partner-only; hidden from customer PDF
+  rackCost            Float  @default(0)  // auto: panels × $18 if rack required
+  permitFeeAmount     Float  @default(0)  // $250 if permit required, else 0
+  // Deal settings
+  saveTheDeal         Boolean @default(false) // true = 30% margin instead of 35%
 
   // Pricing outputs
   lineItems       BidLineItem[]
@@ -231,6 +233,7 @@ model BidLineItem {
   unit        String
   unitPrice   Float
   total       Float
+  internal    Boolean @default(false) // true = omitted from customer-facing PDF
 }
 
 // ─── Bid Photos ───────────────────────────────────────────────────────────────
