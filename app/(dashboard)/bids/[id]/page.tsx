@@ -26,6 +26,14 @@ export default async function BidDetailPage({ params }: { params: { id: string }
     DRAFT: "draft", SENT: "sent", SIGNED: "signed", COMPLETE: "complete", VOIDED: "voided",
   };
 
+  const attachmentLabel: Record<string, string> = {
+    LAG_BOLT: "Comp Attachment w/ Flashing",
+    S5_CLAMP: "S-5 Clamp",
+    TILE_HOOK: "Tile Hook w/ Flashing",
+    FLAT_ROOF_BALLAST: "Flat Roof Ballast",
+    SEAM_CLAMP: "Seam Clamp",
+  };
+
   return (
     <div className="space-y-6 max-w-3xl">
       <div className="flex items-center gap-3">
@@ -76,7 +84,7 @@ export default async function BidDetailPage({ params }: { params: { id: string }
           <div><span className="text-muted-foreground">Pitch:</span> {bid.pitchCategory ?? "—"}</div>
           <div><span className="text-muted-foreground">Stories:</span> {bid.stories}</div>
           {bid.railLinearFt && <div><span className="text-muted-foreground">Rail:</span> {bid.railLinearFt} lin ft</div>}
-          {bid.attachmentType && <div><span className="text-muted-foreground">Attachment:</span> {bid.attachmentType}</div>}
+          {bid.attachmentType && <div><span className="text-muted-foreground">Attachment:</span> {attachmentLabel[bid.attachmentType] ?? bid.attachmentType}</div>}
           {bid.attachmentCount && <div><span className="text-muted-foreground">Attachment Count:</span> {bid.attachmentCount}</div>}
           <div><span className="text-muted-foreground">Scope:</span> {bid.workScope}</div>
         </CardContent>

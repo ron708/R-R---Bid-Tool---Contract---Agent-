@@ -89,10 +89,9 @@ export function StepRoofScope({ form, update }: Props) {
           <Select value={form.attachmentType} onValueChange={(v) => update({ attachmentType: v })}>
             <SelectTrigger><SelectValue placeholder="Select type" /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="LAG_BOLT">Lag Bolt</SelectItem>
-              <SelectItem value="SEAM_CLAMP">Seam Clamp</SelectItem>
+              <SelectItem value="LAG_BOLT">Comp Attachment w/ Flashing</SelectItem>
               <SelectItem value="S5_CLAMP">S-5 Clamp</SelectItem>
-              <SelectItem value="TILE_HOOK">Tile Hook</SelectItem>
+              <SelectItem value="TILE_HOOK">Tile Hook w/ Flashing</SelectItem>
               <SelectItem value="FLAT_ROOF_BALLAST">Flat Roof Ballast</SelectItem>
             </SelectContent>
           </Select>
