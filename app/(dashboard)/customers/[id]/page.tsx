@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import Link from "next/link";
-import { ArrowLeft, Phone, Mail, MapPin, Plus } from "lucide-react";
+import { ArrowLeft, Phone, Mail, MapPin, Plus, Pencil } from "lucide-react";
 
 export default async function CustomerDetailPage({ params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
@@ -26,7 +26,10 @@ export default async function CustomerDetailPage({ params }: { params: { id: str
     <div className="space-y-6 max-w-2xl">
       <div className="flex items-center gap-3">
         <Button variant="ghost" size="icon" asChild><Link href="/customers"><ArrowLeft className="h-4 w-4" /></Link></Button>
-        <h1 className="text-2xl font-bold">{customer.firstName} {customer.lastName}</h1>
+        <h1 className="text-2xl font-bold flex-1">{customer.firstName} {customer.lastName}</h1>
+        <Button variant="outline" size="sm" asChild>
+          <Link href={`/customers/${customer.id}/edit`}><Pencil className="h-3.5 w-3.5 mr-1" />Edit</Link>
+        </Button>
       </div>
 
       <Card>
