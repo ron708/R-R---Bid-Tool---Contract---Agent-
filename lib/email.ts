@@ -1,6 +1,5 @@
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
 const FROM = process.env.EMAIL_FROM ?? "noreply@solarponics.com";
 
 export async function sendProposalEmail(params: {
@@ -10,6 +9,7 @@ export async function sendProposalEmail(params: {
   bidNumber: string;
   pdfBuffer: Buffer;
 }) {
+  const resend = new Resend(process.env.RESEND_API_KEY);
   await resend.emails.send({
     from: FROM,
     to: params.to,
