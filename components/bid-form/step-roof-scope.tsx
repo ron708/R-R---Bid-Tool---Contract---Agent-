@@ -17,15 +17,16 @@ export function StepRoofScope({ form, update }: Props) {
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label>Roof Type</Label>
-          <Select value={form.roofType} onValueChange={(v) => update({ roofType: v })}>
+          <Select
+            value={form.roofType}
+            onValueChange={(v) => update({ roofType: v, flatRoofMaterial: v !== "FLAT" ? "" : form.flatRoofMaterial })}
+          >
             <SelectTrigger><SelectValue placeholder="Select roof type" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="COMP_SHINGLE">Comp Shingle</SelectItem>
               <SelectItem value="TILE">Tile</SelectItem>
               <SelectItem value="METAL">Metal</SelectItem>
-              <SelectItem value="FLAT_TPO">Flat — TPO</SelectItem>
-              <SelectItem value="FLAT_EPDM">Flat — EPDM</SelectItem>
-              <SelectItem value="FLAT_MOD_BIT">Flat — Modified Bitumen</SelectItem>
+              <SelectItem value="FLAT">Flat Roof (TPO, PVC, or Mod Bit)</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -41,6 +42,21 @@ export function StepRoofScope({ form, update }: Props) {
           </Select>
         </div>
       </div>
+
+      {form.roofType === "FLAT" && (
+        <div className="space-y-2">
+          <Label htmlFor="flatRoofMaterial">
+            Membrane — Manufacturer / Brand &amp; Color <span className="text-destructive">*</span>
+          </Label>
+          <Input
+            id="flatRoofMaterial"
+            value={form.flatRoofMaterial}
+            onChange={(e) => update({ flatRoofMaterial: e.target.value })}
+            placeholder="e.g. GAF EverGuard TPO, White"
+          />
+          <p className="text-xs text-muted-foreground">Required for flat roofs — specify type (TPO/PVC/Mod Bit), brand, and color.</p>
+        </div>
+      )}
 
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">

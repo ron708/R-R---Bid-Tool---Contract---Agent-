@@ -59,7 +59,13 @@ export function StepReview({ form, customers, pricing }: Props) {
         <p className="font-semibold text-base mb-2">Roof & Scope</p>
         <div className="grid grid-cols-2 gap-x-8 gap-y-1">
           <div><span className="text-muted-foreground">Scope:</span> {scopeLabel[form.workScope] || form.workScope}</div>
-          <div><span className="text-muted-foreground">Roof:</span> {roofLabel[form.roofType] || form.roofType || "—"}</div>
+          <div>
+            <span className="text-muted-foreground">Roof:</span>{" "}
+            {form.roofType === "FLAT" ? "Flat Roof" : roofLabel[form.roofType] || form.roofType || "—"}
+          </div>
+          {form.roofType === "FLAT" && form.flatRoofMaterial && (
+            <div className="col-span-2"><span className="text-muted-foreground">Membrane:</span> {form.flatRoofMaterial}</div>
+          )}
           <div><span className="text-muted-foreground">Pitch:</span> {pitchLabel[form.pitchCategory] || form.pitchCategory}</div>
           <div><span className="text-muted-foreground">Stories:</span> {form.stories}</div>
           {form.railLinearFt && <div><span className="text-muted-foreground">Rail:</span> {form.railLinearFt} lin ft</div>}

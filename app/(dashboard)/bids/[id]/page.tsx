@@ -66,7 +66,13 @@ export default async function BidDetailPage({ params }: { params: { id: string }
           {bid.panelModel && <div><span className="text-muted-foreground">Model:</span> {bid.panelModel}</div>}
           {bid.inverterType && <div><span className="text-muted-foreground">Inverter:</span> {bid.inverterType}</div>}
           {bid.inverterBrand && <div><span className="text-muted-foreground">Inverter Brand:</span> {bid.inverterBrand}</div>}
-          <div><span className="text-muted-foreground">Roof:</span> {bid.roofType ?? "—"}</div>
+          <div>
+            <span className="text-muted-foreground">Roof:</span>{" "}
+            {bid.roofType === "FLAT" ? "Flat Roof" : bid.roofType ?? "—"}
+          </div>
+          {bid.roofType === "FLAT" && bid.flatRoofMaterial && (
+            <div className="col-span-2"><span className="text-muted-foreground">Membrane:</span> {bid.flatRoofMaterial}</div>
+          )}
           <div><span className="text-muted-foreground">Pitch:</span> {bid.pitchCategory ?? "—"}</div>
           <div><span className="text-muted-foreground">Stories:</span> {bid.stories}</div>
           {bid.railLinearFt && <div><span className="text-muted-foreground">Rail:</span> {bid.railLinearFt} lin ft</div>}

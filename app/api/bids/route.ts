@@ -27,6 +27,7 @@ export async function POST(req: NextRequest) {
       inverterType: body.inverterType || null,
       inverterBrand: body.inverterBrand || null,
       roofType: body.roofType || null,
+      flatRoofMaterial: body.flatRoofMaterial || null,
       pitchCategory: body.pitchCategory || null,
       stories: parseInt(body.stories) || 1,
       railLinearFt: parseFloat(body.railLinearFt) || null,

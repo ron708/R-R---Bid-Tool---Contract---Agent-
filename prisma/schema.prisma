@@ -27,6 +27,7 @@ enum RoofType {
   COMP_SHINGLE
   TILE
   METAL
+  FLAT
   FLAT_TPO
   FLAT_EPDM
   FLAT_MOD_BIT
@@ -175,6 +176,7 @@ model Bid {
 
   // Roof / mounting
   roofType        RoofType?
+  flatRoofMaterial String?      // required when roofType = FLAT; e.g. "GAF EverGuard TPO, White"
   pitchCategory   PitchCategory?
   stories         Int           @default(1)
   railLinearFt    Float?

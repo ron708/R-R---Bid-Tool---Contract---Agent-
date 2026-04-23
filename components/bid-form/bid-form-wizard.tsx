@@ -34,6 +34,7 @@ export interface BidFormData {
   inverterBrand: string;
   // Step 3: Roof & Scope
   roofType: string;
+  flatRoofMaterial: string;
   pitchCategory: string;
   stories: number;
   railLinearFt: string;
@@ -85,6 +86,7 @@ const defaultForm: BidFormData = {
   inverterType: "",
   inverterBrand: "",
   roofType: "",
+  flatRoofMaterial: "",
   pitchCategory: "LOW",
   stories: 1,
   railLinearFt: "",
@@ -216,6 +218,7 @@ export function BidFormWizard({ customers, defaultRates }: Props) {
   const canProceed = () => {
     if (step === 0) return !!form.customerId;
     if (step === 1) return form.panelCount > 0;
+    if (step === 2 && form.roofType === "FLAT") return !!form.flatRoofMaterial.trim();
     return true;
   };
 
