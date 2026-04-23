@@ -82,8 +82,8 @@ export function StepReview({ form, customers, pricing }: Props) {
             <div><span className="text-muted-foreground">Sub-Contractor:</span> {formatCurrency(form.subContractorCost)} <span className="text-xs">(internal)</span></div>
           )}
         </div>
-        {isAdmin && form.saveTheDeal && (
-          <p className="mt-2 text-sm font-medium text-amber-600">Save the Deal — 30% margin applied</p>
+        {form.saveTheDeal && (
+          <p className="mt-2 text-sm font-medium text-amber-600">Discount Bid applied</p>
         )}
       </section>
 

@@ -1,6 +1,5 @@
 "use client";
 
-import { useSession } from "next-auth/react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, MapPin, Users, Wrench, Tag } from "lucide-react";
@@ -58,9 +57,6 @@ function YesNoToggle({
 }
 
 export function StepCost({ form, update, milesLoading, permitFeeAmount, rackCost }: Props) {
-  const { data: session } = useSession();
-  const isAdmin = session?.user?.role === "SOLARPONICS_ADMIN";
-
   return (
     <div className="space-y-7">
 
@@ -164,8 +160,8 @@ export function StepCost({ form, update, milesLoading, permitFeeAmount, rackCost
         </p>
       </div>
 
-      {/* Save the Deal — admin only */}
-      {isAdmin && <div className={cn(
+      {/* Discount Bid */}
+      <div className={cn(
         "rounded-lg border-2 p-4 transition-colors",
         form.saveTheDeal
           ? "border-amber-400 bg-amber-50 dark:bg-amber-950/20"
@@ -176,22 +172,19 @@ export function StepCost({ form, update, milesLoading, permitFeeAmount, rackCost
             <Tag className={cn("h-5 w-5 mt-0.5 shrink-0", form.saveTheDeal ? "text-amber-600" : "text-muted-foreground")} />
             <div>
               <p className={cn("font-semibold text-sm", form.saveTheDeal && "text-amber-700 dark:text-amber-400")}>
-                Save the Deal
+                Discount Bid
               </p>
               <p className="text-xs text-muted-foreground mt-0.5">
-                Reduces margin from 35% → 30% to close a price-sensitive job.
-                Use only when needed.
+                Apply a discounted contract price to close a price-sensitive job.
               </p>
             </div>
           </div>
           <YesNoToggle
             value={form.saveTheDeal}
             onChange={(v) => update({ saveTheDeal: v })}
-            yesLabel="30%"
-            noLabel="35%"
           />
         </div>
-      </div>}
+      </div>
 
     </div>
   );

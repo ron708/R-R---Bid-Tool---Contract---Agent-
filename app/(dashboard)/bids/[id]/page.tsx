@@ -113,7 +113,12 @@ export default async function BidDetailPage({ params }: { params: { id: string }
         </Card>
       ) : (
         <Card>
-          <CardContent className="pt-6">
+          <CardContent className="pt-6 space-y-3">
+            {bid.saveTheDeal && (
+              <span className="text-xs font-medium bg-amber-100 text-amber-700 px-2 py-1 rounded-full">
+                Discount Bid applied
+              </span>
+            )}
             <div className="flex justify-between font-bold text-base">
               <span>Contract Total</span>
               <span className="text-solar-orange text-xl tabular-nums">{formatCurrency(bid.total ?? 0)}</span>
