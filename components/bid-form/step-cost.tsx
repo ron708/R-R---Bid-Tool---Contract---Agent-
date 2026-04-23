@@ -11,6 +11,7 @@ interface Props {
   form: BidFormData;
   update: (patch: Partial<BidFormData>) => void;
   milesLoading: boolean;
+  milesNotFound: boolean;
   permitFeeAmount: number; // derived: $250 or $0
   rackCost: number;        // derived: panels × $18 or $0
 }
@@ -56,7 +57,7 @@ function YesNoToggle({
   );
 }
 
-export function StepCost({ form, update, milesLoading, permitFeeAmount, rackCost }: Props) {
+export function StepCost({ form, update, milesLoading, milesNotFound, permitFeeAmount, rackCost }: Props) {
   return (
     <div className="space-y-7">
 
@@ -107,6 +108,11 @@ export function StepCost({ form, update, milesLoading, permitFeeAmount, rackCost
           />
         </div>
         <p className="text-xs text-muted-foreground">Auto-calculated from job address. Override if needed.</p>
+        {milesNotFound && (
+          <p className="text-xs text-amber-600 font-medium mt-1">
+            Address not found — please enter miles manually.
+          </p>
+        )}
       </div>
 
       {/* Permit Fee */}

@@ -110,6 +110,7 @@ export function BidFormWizard({ customers, defaultRates }: Props) {
   const [form, setForm] = useState<BidFormData>(defaultForm);
   const [saving, setSaving] = useState(false);
   const [milesLoading, setMilesLoading] = useState(false);
+  const [milesNotFound, setMilesNotFound] = useState(false);
 
   const update = useCallback(
     (patch: Partial<BidFormData>) => setForm((f) => ({ ...f, ...patch })),
@@ -135,15 +136,20 @@ export function BidFormWizard({ customers, defaultRates }: Props) {
 
     let cancelled = false;
     setMilesLoading(true);
+    setMilesNotFound(false);
 
     fetch(`/api/utils/distance?address=${encodeURIComponent(address)}`)
       .then((r) => r.json())
       .then(({ miles }: { miles?: number }) => {
-        if (!cancelled && typeof miles === "number" && miles > 0) {
+        if (cancelled) return;
+        if (typeof miles === "number" && miles > 0) {
           setForm((f) => ({ ...f, milesFromJob: miles }));
+          setMilesNotFound(false);
+        } else {
+          setMilesNotFound(true);
         }
       })
-      .catch(() => {})
+      .catch(() => { if (!cancelled) setMilesNotFound(true); })
       .finally(() => { if (!cancelled) setMilesLoading(false); });
 
     return () => { cancelled = true; };
@@ -245,6 +251,7 @@ export function BidFormWizard({ customers, defaultRates }: Props) {
               form={form}
               update={update}
               milesLoading={milesLoading}
+              milesNotFound={milesNotFound}
               permitFeeAmount={permitFeeAmount}
               rackCost={rackCost}
             />
