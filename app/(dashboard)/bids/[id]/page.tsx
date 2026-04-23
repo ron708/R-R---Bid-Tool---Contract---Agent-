@@ -19,7 +19,8 @@ export default async function BidDetailPage({ params }: { params: { id: string }
     include: { customer: true, contractor: true, lineItems: { orderBy: { sortOrder: "asc" } }, photos: true },
   });
 
-  if (!bid || bid.contractorId !== session!.user.contractorId) notFound();
+  const isAdmin = session?.user?.role === "SOLARPONICS_ADMIN";
+  if (!bid || (!isAdmin && bid.contractorId !== session!.user.contractorId)) notFound();
 
   const statusVariantMap: Record<string, "draft" | "sent" | "signed" | "complete" | "voided"> = {
     DRAFT: "draft", SENT: "sent", SIGNED: "signed", COMPLETE: "complete", VOIDED: "voided",
@@ -75,45 +76,51 @@ export default async function BidDetailPage({ params }: { params: { id: string }
         </CardContent>
       </Card>
 
-      {/* Pricing */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-base">Pricing Breakdown</CardTitle>
-            {bid.saveTheDeal && (
-              <span className="text-xs font-medium bg-amber-100 text-amber-700 px-2 py-1 rounded-full">
-                Save the Deal — 30% margin
-              </span>
-            )}
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-1.5 text-sm">
-          {bid.lineItems.filter(i => !i.internal).map((item) => (
-            <div key={item.id} className="flex justify-between">
-              <span className="text-muted-foreground">
-                {item.description}
-                {item.unit !== "flat" && ` (${item.quantity} ${item.unit} × ${formatCurrency(item.unitPrice)})`}
-              </span>
-              <span className="tabular-nums">{formatCurrency(item.total)}</span>
+      {/* Pricing — admin sees full breakdown, partners see total only */}
+      {isAdmin ? (
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-base">Pricing Breakdown</CardTitle>
+              {bid.saveTheDeal && (
+                <span className="text-xs font-medium bg-amber-100 text-amber-700 px-2 py-1 rounded-full">
+                  Save the Deal — 30% margin
+                </span>
+              )}
             </div>
-          ))}
-          {bid.subContractorCost > 0 && (
-            <div className="flex justify-between text-muted-foreground border-t pt-1.5 mt-1.5 border-dashed">
-              <span className="italic">Sub-Contractor (internal)</span>
-              <span className="tabular-nums">{formatCurrency(bid.subContractorCost)}</span>
+          </CardHeader>
+          <CardContent className="space-y-1.5 text-sm">
+            {bid.lineItems.map((item) => (
+              <div key={item.id} className={`flex justify-between ${item.internal ? "opacity-60 italic" : ""}`}>
+                <span className="text-muted-foreground">
+                  {item.description}
+                  {item.unit !== "flat" && ` (${item.quantity} ${item.unit} × ${formatCurrency(item.unitPrice)})`}
+                  {item.internal && " (internal)"}
+                </span>
+                <span className="tabular-nums">{formatCurrency(item.total)}</span>
+              </div>
+            ))}
+            <Separator />
+            <div className="flex justify-between text-muted-foreground">
+              <span>Subtotal (costs)</span>
+              <span className="tabular-nums">{formatCurrency(bid.subtotal ?? 0)}</span>
             </div>
-          )}
-          <Separator />
-          <div className="flex justify-between text-muted-foreground">
-            <span>Subtotal (costs)</span>
-            <span className="tabular-nums">{formatCurrency(bid.subtotal ?? 0)}</span>
-          </div>
-          <div className="flex justify-between font-bold text-base pt-1">
-            <span>Contract Total</span>
-            <span className="text-solar-orange tabular-nums">{formatCurrency(bid.total ?? 0)}</span>
-          </div>
-        </CardContent>
-      </Card>
+            <div className="flex justify-between font-bold text-base pt-1">
+              <span>Contract Total</span>
+              <span className="text-solar-orange tabular-nums">{formatCurrency(bid.total ?? 0)}</span>
+            </div>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex justify-between font-bold text-base">
+              <span>Contract Total</span>
+              <span className="text-solar-orange text-xl tabular-nums">{formatCurrency(bid.total ?? 0)}</span>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Payment Schedule */}
       <Card>

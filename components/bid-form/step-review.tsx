@@ -1,5 +1,6 @@
 "use client";
 
+import { useSession } from "next-auth/react";
 import { Separator } from "@/components/ui/separator";
 import { formatCurrency } from "@/lib/utils";
 import type { BidFormData } from "./bid-form-wizard";
@@ -27,6 +28,8 @@ const pitchLabel: Record<string, string> = {
 };
 
 export function StepReview({ form, customers, pricing }: Props) {
+  const { data: session } = useSession();
+  const isAdmin = session?.user?.role === "SOLARPONICS_ADMIN";
   const customer = customers.find((c) => c.id === form.customerId);
 
   return (
@@ -75,43 +78,48 @@ export function StepReview({ form, customers, pricing }: Props) {
           {form.milesFromJob > 0 && <div><span className="text-muted-foreground">Miles:</span> {form.milesFromJob} mi</div>}
           <div><span className="text-muted-foreground">Permit:</span> {form.includePermit ? `Yes — $250` : "No"}</div>
           <div><span className="text-muted-foreground">Rack/Rail:</span> {form.includeRack ? `Yes — ${formatCurrency(form.panelCount * 18)}` : "No"}</div>
-          {form.subContractorCost > 0 && (
+          {isAdmin && form.subContractorCost > 0 && (
             <div><span className="text-muted-foreground">Sub-Contractor:</span> {formatCurrency(form.subContractorCost)} <span className="text-xs">(internal)</span></div>
           )}
         </div>
-        {form.saveTheDeal && (
+        {isAdmin && form.saveTheDeal && (
           <p className="mt-2 text-sm font-medium text-amber-600">Save the Deal — 30% margin applied</p>
         )}
       </section>
 
       <Separator />
 
-      <section>
-        <p className="font-semibold text-base mb-3">Pricing Breakdown</p>
-        <div className="space-y-1.5">
-          {pricing.lineItems.map((item, i) => (
-            <div key={i} className={`flex justify-between ${item.internal ? "opacity-50 italic" : ""}`}>
-              <span className="text-muted-foreground">
-                {item.description}
-                {item.unit !== "flat" && ` (${item.quantity} ${item.unit} × ${formatCurrency(item.unitPrice)})`}
-                {item.internal && " (internal)"}
-              </span>
-              <span className="font-medium tabular-nums">{formatCurrency(item.total)}</span>
+      {isAdmin && (
+        <section>
+          <p className="font-semibold text-base mb-3">Pricing Breakdown</p>
+          <div className="space-y-1.5">
+            {pricing.lineItems.map((item, i) => (
+              <div key={i} className={`flex justify-between ${item.internal ? "opacity-50 italic" : ""}`}>
+                <span className="text-muted-foreground">
+                  {item.description}
+                  {item.unit !== "flat" && ` (${item.quantity} ${item.unit} × ${formatCurrency(item.unitPrice)})`}
+                  {item.internal && " (internal)"}
+                </span>
+                <span className="font-medium tabular-nums">{formatCurrency(item.total)}</span>
+              </div>
+            ))}
+          </div>
+          <Separator className="my-3" />
+          <div className="space-y-1">
+            <div className="flex justify-between text-sm text-muted-foreground">
+              <span>Subtotal (costs)</span>
+              <span className="tabular-nums">{formatCurrency(pricing.subtotal)}</span>
             </div>
-          ))}
-        </div>
-        <Separator className="my-3" />
-        <div className="space-y-1">
-          <div className="flex justify-between text-sm text-muted-foreground">
-            <span>Subtotal (costs)</span>
-            <span className="tabular-nums">{formatCurrency(pricing.subtotal)}</span>
+            <div className="flex justify-between text-sm text-muted-foreground">
+              <span>Gross profit ({pricing.profitPercent.toFixed(1)}%)</span>
+              <span className="tabular-nums">{formatCurrency(pricing.grossProfit)}</span>
+            </div>
           </div>
-          <div className="flex justify-between text-sm text-muted-foreground">
-            <span>Gross profit ({pricing.profitPercent.toFixed(1)}%)</span>
-            <span className="tabular-nums">{formatCurrency(pricing.grossProfit)}</span>
-          </div>
-        </div>
-        <Separator className="my-3" />
+          <Separator className="my-3" />
+        </section>
+      )}
+
+      <section>
         <div className="flex justify-between font-bold text-base">
           <span>Contract Total</span>
           <span className="text-solar-orange text-lg tabular-nums">{formatCurrency(pricing.total)}</span>

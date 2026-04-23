@@ -1,5 +1,6 @@
 "use client";
 
+import { useSession } from "next-auth/react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, MapPin, Users, Wrench, Tag } from "lucide-react";
@@ -57,6 +58,9 @@ function YesNoToggle({
 }
 
 export function StepCost({ form, update, milesLoading, permitFeeAmount, rackCost }: Props) {
+  const { data: session } = useSession();
+  const isAdmin = session?.user?.role === "SOLARPONICS_ADMIN";
+
   return (
     <div className="space-y-7">
 
@@ -160,8 +164,8 @@ export function StepCost({ form, update, milesLoading, permitFeeAmount, rackCost
         </p>
       </div>
 
-      {/* Save the Deal */}
-      <div className={cn(
+      {/* Save the Deal — admin only */}
+      {isAdmin && <div className={cn(
         "rounded-lg border-2 p-4 transition-colors",
         form.saveTheDeal
           ? "border-amber-400 bg-amber-50 dark:bg-amber-950/20"
@@ -187,7 +191,7 @@ export function StepCost({ form, update, milesLoading, permitFeeAmount, rackCost
             noLabel="35%"
           />
         </div>
-      </div>
+      </div>}
 
     </div>
   );
