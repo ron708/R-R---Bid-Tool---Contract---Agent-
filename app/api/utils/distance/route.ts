@@ -21,22 +21,17 @@ function haversineMiles(lat1: number, lon1: number, lat2: number, lon2: number) 
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
+/** US Census Geocoder — free, no API key, comprehensive US residential coverage */
 async function geocode(address: string): Promise<{ lat: number; lon: number } | null> {
   const url =
-    `https://nominatim.openstreetmap.org/search` +
-    `?q=${encodeURIComponent(address)}&format=json&limit=1&countrycodes=us`;
-  const res = await fetch(url, {
-    headers: {
-      "User-Agent": "Solarponics-RR-BidTool/1.0 (info@solarponics.com)",
-      Accept: "application/json",
-    },
-    // Nominatim asks for a 1-second gap between requests — acceptable for per-user calls
-    cache: "no-store",
-  });
+    `https://geocoding.geo.census.gov/geocoder/locations/onelineaddress` +
+    `?address=${encodeURIComponent(address)}&benchmark=2020&format=json`;
+  const res = await fetch(url, { cache: "no-store" });
   if (!res.ok) return null;
-  const data: Array<{ lat: string; lon: string }> = await res.json();
-  if (!data[0]) return null;
-  return { lat: parseFloat(data[0].lat), lon: parseFloat(data[0].lon) };
+  const data = await res.json();
+  const match = data?.result?.addressMatches?.[0];
+  if (!match) return null;
+  return { lat: match.coordinates.y, lon: match.coordinates.x };
 }
 
 export async function GET(req: NextRequest) {
