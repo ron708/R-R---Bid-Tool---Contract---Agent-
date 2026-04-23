@@ -17,7 +17,7 @@ async function main() {
       state: "CA",
       zip: "93422",
       phone: "(805) 466-5595",
-      email: "info@solarponics.com",
+      email: "Ron@Solarponics.com",
       website: "https://solarponics.com",
       termsConditions: `SOLAR PANEL REMOVE & REPLACE (R&R) — TERMS AND CONDITIONS
 

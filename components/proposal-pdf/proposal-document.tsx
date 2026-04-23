@@ -156,7 +156,7 @@ export function ProposalDocument({ bid, config }: Props) {
             <Text style={s.proposalNum}>{bid.bidNumber}</Text>
             <Text style={s.proposalDate}>Date: {formatDate(bid.createdAt)}</Text>
             <View style={s.partnerBadge}>
-              <Text style={s.partnerBadgeText}>Strategic Partner: {bid.contractor.name}</Text>
+              <Text style={s.partnerBadgeText}>Strategic Partner: <Text style={{ fontFamily: "Helvetica-Bold" }}>{bid.contractor.name}</Text></Text>
             </View>
           </View>
         </View>
@@ -283,18 +283,29 @@ export function ProposalDocument({ bid, config }: Props) {
 
         {/* Signatures */}
         <Text style={{ ...s.sectionTitle, marginTop: 20 }}>AUTHORIZATION & SIGNATURES</Text>
-        <Text style={{ fontSize: 8.5, color: "#374151", marginBottom: 10 }}>
+        <Text style={{ fontSize: 8.5, color: "#374151", marginBottom: 8 }}>
           By signing below, both parties agree to the scope of work, pricing, payment schedule, and all terms and conditions set forth in this agreement.
         </Text>
+        <View style={{ backgroundColor: "#fff7ed", borderLeftWidth: 2, borderLeftColor: ORANGE, paddingTop: 6, paddingBottom: 6, paddingLeft: 8, paddingRight: 8, marginBottom: 14 }}>
+          <Text style={{ fontSize: 7.5, fontFamily: "Helvetica-Bold", color: "#92400e" }}>
+            IMPORTANT: This proposal is not a final or binding agreement until it has been reviewed, accepted, and countersigned by an authorized representative of {config.companyName}.
+          </Text>
+        </View>
         <View style={s.sigSection}>
           <View style={s.sigBox}>
-            <View style={s.sigLine} />
+            <View style={{ marginTop: 28, marginBottom: 4, flexDirection: "row", alignItems: "center" }}>
+              <Text style={{ fontSize: 14, fontFamily: "Helvetica-Bold", marginRight: 6 }}>X</Text>
+              <View style={{ flex: 1, borderTopWidth: 1, borderTopColor: "#374151" }} />
+            </View>
             <Text style={s.sigLabel}>Customer Signature</Text>
             <Text style={{ ...s.sigLabel, marginTop: 3 }}>Print Name: {bid.customer.firstName} {bid.customer.lastName}</Text>
             <Text style={{ ...s.sigLabel, marginTop: 10 }}>Date: ___________________________</Text>
           </View>
           <View style={s.sigBox}>
-            <View style={s.sigLine} />
+            <View style={{ marginTop: 28, marginBottom: 4, flexDirection: "row", alignItems: "center" }}>
+              <Text style={{ fontSize: 14, fontFamily: "Helvetica-Bold", marginRight: 6 }}>X</Text>
+              <View style={{ flex: 1, borderTopWidth: 1, borderTopColor: "#374151" }} />
+            </View>
             <Text style={s.sigLabel}>Authorized Representative — {config.companyName}</Text>
             <Text style={{ ...s.sigLabel, marginTop: 3 }}>Print Name: ___________________________</Text>
             <Text style={{ ...s.sigLabel, marginTop: 10 }}>Date: ___________________________</Text>
@@ -346,7 +357,10 @@ export function ProposalDocument({ bid, config }: Props) {
 
         <View style={{ ...s.sigSection, marginTop: 40 }}>
           <View style={s.sigBox}>
-            <View style={s.sigLine} />
+            <View style={{ marginTop: 28, marginBottom: 4, flexDirection: "row", alignItems: "center" }}>
+              <Text style={{ fontSize: 14, fontFamily: "Helvetica-Bold", marginRight: 6 }}>X</Text>
+              <View style={{ flex: 1, borderTopWidth: 1, borderTopColor: "#374151" }} />
+            </View>
             <Text style={s.sigLabel}>Customer Signature — Preexisting Conditions Acknowledgment</Text>
             <Text style={{ ...s.sigLabel, marginTop: 3 }}>Print Name: {bid.customer.firstName} {bid.customer.lastName}</Text>
             <Text style={{ ...s.sigLabel, marginTop: 10 }}>Date: ___________________________</Text>
@@ -400,7 +414,10 @@ export function ProposalDocument({ bid, config }: Props) {
 
         <View style={{ ...s.sigSection, marginTop: 20 }}>
           <View style={s.sigBox}>
-            <View style={s.sigLine} />
+            <View style={{ marginTop: 28, marginBottom: 4, flexDirection: "row", alignItems: "center" }}>
+              <Text style={{ fontSize: 14, fontFamily: "Helvetica-Bold", marginRight: 6 }}>X</Text>
+              <View style={{ flex: 1, borderTopWidth: 1, borderTopColor: "#374151" }} />
+            </View>
             <Text style={s.sigLabel}>Customer Signature</Text>
             <Text style={{ ...s.sigLabel, marginTop: 3 }}>Print Name: {bid.customer.firstName} {bid.customer.lastName}</Text>
             <Text style={{ ...s.sigLabel, marginTop: 10 }}>Date: ___________________________</Text>
