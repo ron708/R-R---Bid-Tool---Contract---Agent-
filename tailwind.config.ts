@@ -52,6 +52,7 @@ const config: Config = {
           orange: "#F97316",
           blue: "#1E3A5F",
           gold: "#F59E0B",
+          green: "#5CAD2F",
         },
       },
       borderRadius: {

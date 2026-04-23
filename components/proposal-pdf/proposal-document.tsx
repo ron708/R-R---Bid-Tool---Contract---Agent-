@@ -10,6 +10,7 @@ import type { Bid, BidLineItem, Customer, Contractor, SolarponicsConfig } from "
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
+const GREEN = "#5CAD2F";
 const NAVY = "#1E3A5F";
 const ORANGE = "#F97316";
 const GRAY = "#6b7280";
@@ -19,9 +20,9 @@ const s = StyleSheet.create({
   page: { fontFamily: "Helvetica", fontSize: 9.5, padding: 40, color: "#1a1a1a", lineHeight: 1.4 },
 
   // Header
-  header: { flexDirection: "row", justifyContent: "space-between", marginBottom: 20, paddingBottom: 14, borderBottomWidth: 2, borderBottomColor: NAVY },
+  header: { flexDirection: "row", justifyContent: "space-between", marginBottom: 20, paddingBottom: 14, borderBottomWidth: 2, borderBottomColor: GREEN },
   companyBlock: { flex: 1 },
-  companyName: { fontSize: 18, fontFamily: "Helvetica-Bold", color: NAVY, marginBottom: 2 },
+  companyName: { fontSize: 18, fontFamily: "Helvetica-Bold", color: GREEN, marginBottom: 2 },
   companyMeta: { fontSize: 7.5, color: GRAY },
   metaBlock: { alignItems: "flex-end" },
   docTitle: { fontSize: 7.5, color: GRAY, textTransform: "uppercase", letterSpacing: 1, marginBottom: 3 },
@@ -31,7 +32,7 @@ const s = StyleSheet.create({
   partnerBadgeText: { fontSize: 7.5, color: "#92400e" },
 
   // Section
-  sectionTitle: { fontSize: 10, fontFamily: "Helvetica-Bold", color: NAVY, marginBottom: 5, marginTop: 14, borderBottomWidth: 1, borderBottomColor: "#e5e7eb", paddingBottom: 3 },
+  sectionTitle: { fontSize: 10, fontFamily: "Helvetica-Bold", color: GREEN, marginBottom: 5, marginTop: 14, borderBottomWidth: 1, borderBottomColor: "#e5e7eb", paddingBottom: 3 },
 
   // Two-column rows
   row2: { flexDirection: "row", gap: 16, marginBottom: 3 },
@@ -53,7 +54,7 @@ const s = StyleSheet.create({
   totalsRow: { flexDirection: "row", gap: 40, marginBottom: 2 },
   totalsLabel: { color: GRAY, textAlign: "right", width: 120 },
   totalsValue: { textAlign: "right", width: 80 },
-  grandTotal: { flexDirection: "row", gap: 40, marginTop: 6, paddingTop: 6, borderTopWidth: 2, borderTopColor: NAVY },
+  grandTotal: { flexDirection: "row", gap: 40, marginTop: 6, paddingTop: 6, borderTopWidth: 2, borderTopColor: GREEN },
   grandTotalLabel: { fontFamily: "Helvetica-Bold", fontSize: 12, textAlign: "right", width: 120 },
   grandTotalValue: { fontSize: 16, fontFamily: "Helvetica-Bold", color: ORANGE, textAlign: "right", width: 80 },
 
@@ -98,7 +99,15 @@ const scopeLabel: Record<string, string> = {
 
 const roofLabel: Record<string, string> = {
   COMP_SHINGLE: "Composition Shingle", TILE: "Tile", METAL: "Metal",
-  FLAT_TPO: "Flat — TPO", FLAT_EPDM: "Flat — EPDM", FLAT_MOD_BIT: "Flat — Modified Bitumen",
+  FLAT: "Flat Roof", FLAT_TPO: "Flat — TPO", FLAT_EPDM: "Flat — EPDM", FLAT_MOD_BIT: "Flat — Modified Bitumen",
+};
+
+const attachmentLabel: Record<string, string> = {
+  LAG_BOLT: "Comp Attachment w/ Flashing",
+  S5_CLAMP: "S-5 Clamp",
+  TILE_HOOK: "Tile Hook w/ Flashing",
+  FLAT_ROOF_BALLAST: "Flat Roof Ballast",
+  SEAM_CLAMP: "Seam Clamp",
 };
 
 const pitchLabel: Record<string, string> = {
@@ -126,8 +135,6 @@ export function ProposalDocument({ bid, config }: Props) {
   const siteAddress = [bid.customer.siteAddress, bid.customer.siteCity, bid.customer.siteState, bid.customer.siteZip].filter(Boolean).join(", ");
   const depositAmt = bid.depositAmount ?? (bid.total ? bid.total * 0.10 : 0);
   const finalAmt = bid.finalPayment ?? (bid.total ? bid.total * 0.90 : 0);
-  // Filter out internal items (e.g. sub-contractor cost) from customer-facing document
-  const visibleLineItems = bid.lineItems.filter((item) => !item.internal);
 
   return (
     <Document>
@@ -184,14 +191,14 @@ export function ProposalDocument({ bid, config }: Props) {
           {bid.pitchCategory && <Text><Text style={s.label}>Pitch: </Text>{pitchLabel[bid.pitchCategory] ?? bid.pitchCategory}</Text>}
           {bid.stories > 1 && <Text><Text style={s.label}>Stories: </Text>{bid.stories}</Text>}
           {bid.railLinearFt && <Text><Text style={s.label}>Rail: </Text>{bid.railLinearFt} linear ft</Text>}
-          {bid.attachmentType && <Text><Text style={s.label}>Attachment: </Text>{bid.attachmentType}</Text>}
+          {bid.attachmentType && <Text><Text style={s.label}>Attachment: </Text>{attachmentLabel[bid.attachmentType] ?? bid.attachmentType}</Text>}
           {bid.attachmentCount && <Text><Text style={s.label}>Attachment Count: </Text>{bid.attachmentCount}</Text>}
         </View>
         {bid.notes && (
           <Text style={{ marginTop: 5, color: "#374151", fontStyle: "italic" }}>Note: {bid.notes}</Text>
         )}
 
-        {/* Pricing */}
+        {/* Pricing — customer-facing only, no internal cost breakdown */}
         <Text style={s.sectionTitle}>PRICING</Text>
         <View style={s.table}>
           <View style={s.tableHead}>
@@ -199,20 +206,31 @@ export function ProposalDocument({ bid, config }: Props) {
             <Text style={{ ...s.tableHeadText, ...s.tQty }}>Qty / Unit</Text>
             <Text style={{ ...s.tableHeadText, ...s.tAmt }}>Amount</Text>
           </View>
-          {visibleLineItems.map((item, i) => (
-            <View key={i} style={{ ...s.tableRow, backgroundColor: i % 2 === 0 ? "white" : "#f9fafb" }}>
-              <Text style={s.tDesc}>{item.description}</Text>
-              <Text style={{ ...s.tQty, color: GRAY }}>{item.unit === "flat" ? "—" : `${item.quantity} ${item.unit}`}</Text>
-              <Text style={s.tAmt}>{formatCurrency(item.total)}</Text>
+          {/* Main service line */}
+          <View style={{ ...s.tableRow, backgroundColor: "white" }}>
+            <Text style={s.tDesc}>{scopeLabel[bid.workScope] ?? bid.workScope} — {bid.panelCount} Panels</Text>
+            <Text style={{ ...s.tQty, color: GRAY }}>—</Text>
+            <Text style={s.tAmt}>{formatCurrency((bid.total ?? 0) - (bid.permitFeeAmount ?? 0) - (bid.rackCost ?? 0))}</Text>
+          </View>
+          {/* Permit fee (if applicable) */}
+          {(bid.permitFeeAmount ?? 0) > 0 && (
+            <View style={{ ...s.tableRow, backgroundColor: "#f9fafb" }}>
+              <Text style={s.tDesc}>Permit Processing Fee</Text>
+              <Text style={{ ...s.tQty, color: GRAY }}>—</Text>
+              <Text style={s.tAmt}>{formatCurrency(bid.permitFeeAmount ?? 0)}</Text>
             </View>
-          ))}
+          )}
+          {/* Rack / rail (if applicable) */}
+          {(bid.rackCost ?? 0) > 0 && (
+            <View style={{ ...s.tableRow, backgroundColor: (bid.permitFeeAmount ?? 0) > 0 ? "white" : "#f9fafb" }}>
+              <Text style={s.tDesc}>Rack / Rail System — {bid.panelCount} Panels</Text>
+              <Text style={{ ...s.tQty, color: GRAY }}>—</Text>
+              <Text style={s.tAmt}>{formatCurrency(bid.rackCost ?? 0)}</Text>
+            </View>
+          )}
         </View>
 
         <View style={s.totalsBlock}>
-          <View style={s.totalsRow}>
-            <Text style={s.totalsLabel}>Subtotal (Costs)</Text>
-            <Text style={s.totalsValue}>{formatCurrency(bid.subtotal ?? 0)}</Text>
-          </View>
           <View style={s.grandTotal}>
             <Text style={s.grandTotalLabel}>CONTRACT TOTAL</Text>
             <Text style={s.grandTotalValue}>{formatCurrency(bid.total ?? 0)}</Text>

@@ -40,9 +40,9 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-solar-blue to-primary/90 p-4">
       <div className="w-full max-w-md">
         <div className="flex flex-col items-center mb-8">
-          <div className="flex items-center gap-2 text-white mb-2">
-            <Sun className="h-10 w-10 text-solar-gold" />
-            <span className="text-3xl font-bold tracking-tight">Solarponics</span>
+          <div className="flex items-center gap-2 mb-2">
+            <Sun className="h-10 w-10 text-solar-green" />
+            <span className="text-3xl font-bold tracking-tight text-solar-green">Solarponics</span>
           </div>
           <p className="text-white/70 text-sm">R&R Bid Tool — Partner Portal</p>
         </div>

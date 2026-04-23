@@ -43,9 +43,9 @@ export function NavSidebar() {
     <aside className="flex flex-col h-full w-64 border-r bg-card shrink-0">
       {/* Logo */}
       <div className="flex items-center gap-2 px-6 py-5 border-b">
-        <Sun className="h-7 w-7 text-solar-orange shrink-0" />
+        <Sun className="h-7 w-7 text-solar-green shrink-0" />
         <div className="leading-tight">
-          <p className="font-bold text-sm text-primary">Solarponics</p>
+          <p className="font-bold text-sm text-solar-green">Solarponics</p>
           <p className="text-xs text-muted-foreground">R&R Bid Tool</p>
         </div>
       </div>
