@@ -28,6 +28,7 @@ const partnerLinks = [
 
 const adminLinks = [
   { href: "/admin/dashboard", label: "Overview", icon: LayoutDashboard },
+  { href: "/admin/bids", label: "Bids", icon: FileText },
   { href: "/admin/partners", label: "Partners", icon: Building2 },
   { href: "/admin/pricing", label: "Pricing", icon: DollarSign },
   { href: "/admin/branding", label: "Branding & T&C", icon: Palette },
