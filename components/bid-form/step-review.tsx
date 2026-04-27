@@ -76,24 +76,23 @@ export function StepReview({ form, customers, pricing }: Props) {
 
       <Separator />
 
-      <section>
-        <p className="font-semibold text-base mb-2">Cost Inputs</p>
-        <div className="grid grid-cols-2 gap-x-8 gap-y-1">
-          <div><span className="text-muted-foreground">Parts:</span> {formatCurrency(form.partsEstimate)}</div>
-          <div><span className="text-muted-foreground">Crew:</span> {form.crewCount} × {form.crewDays} days</div>
-          {form.milesFromJob > 0 && <div><span className="text-muted-foreground">Miles:</span> {form.milesFromJob} mi</div>}
-          <div><span className="text-muted-foreground">Permit:</span> {form.includePermit ? `Yes — $250` : "No"}</div>
-          <div><span className="text-muted-foreground">Rack/Rail:</span> {form.includeRack ? `Yes — ${formatCurrency(form.panelCount * 18)}` : "No"}</div>
-          {isAdmin && form.subContractorCost > 0 && (
-            <div><span className="text-muted-foreground">Sub-Contractor:</span> {formatCurrency(form.subContractorCost)} <span className="text-xs">(internal)</span></div>
-          )}
-        </div>
-        {form.saveTheDeal && (
-          <p className="mt-2 text-sm font-medium text-amber-600">Discount Bid applied</p>
-        )}
-      </section>
+      {isAdmin && (
+        <section>
+          <p className="font-semibold text-base mb-2">Cost Inputs</p>
+          <div className="grid grid-cols-2 gap-x-8 gap-y-1">
+            <div><span className="text-muted-foreground">Parts:</span> {formatCurrency(form.partsEstimate)}</div>
+            <div><span className="text-muted-foreground">Crew:</span> {form.crewCount} × {form.crewDays} days</div>
+            {form.milesFromJob > 0 && <div><span className="text-muted-foreground">Miles:</span> {form.milesFromJob} mi</div>}
+            <div><span className="text-muted-foreground">Permit:</span> {form.includePermit ? `Yes — $250` : "No"}</div>
+            <div><span className="text-muted-foreground">Rack/Rail:</span> {form.includeRack ? `Yes — ${formatCurrency(form.panelCount * 18)}` : "No"}</div>
+            {form.subContractorCost > 0 && (
+              <div><span className="text-muted-foreground">Sub-Contractor:</span> {formatCurrency(form.subContractorCost)} <span className="text-xs">(internal)</span></div>
+            )}
+          </div>
+        </section>
+      )}
 
-      <Separator />
+      {isAdmin && <Separator />}
 
       {isAdmin && (
         <section>
@@ -126,6 +125,9 @@ export function StepReview({ form, customers, pricing }: Props) {
       )}
 
       <section>
+        {form.saveTheDeal && (
+          <p className="mb-2 text-sm font-medium text-amber-600">Discount Bid applied</p>
+        )}
         <div className="flex justify-between font-bold text-base">
           <span>Contract Total</span>
           <span className="text-solar-orange text-lg tabular-nums">{formatCurrency(pricing.total)}</span>
