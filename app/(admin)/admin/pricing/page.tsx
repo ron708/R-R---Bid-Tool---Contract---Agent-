@@ -61,7 +61,7 @@ const RATE_FIELDS = [
 
 export default function PricingPage() {
   const [loading, setLoading] = useState(false);
-  const [rates, setRates] = useState<Record<string, number>>({});
+  const [rates, setRates] = useState<Record<string, number> | null>(null);
 
   useEffect(() => {
     fetch("/api/admin/pricing").then((r) => r.json()).then(setRates);
@@ -97,35 +97,46 @@ export default function PricingPage() {
         </p>
       </div>
 
-      <form onSubmit={save}>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Cost-Plus Rate Table</CardTitle>
-            <CardDescription>
-              Rates verified against the Solarponics Excel bid tool (OVERHEAD COST SHEET).
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {RATE_FIELDS.map(({ key, label, hint, step }) => (
-              <div key={key} className="space-y-1">
-                <Label className="text-sm font-medium">{label}</Label>
-                <Input
-                  name={key}
-                  type="number"
-                  step={step}
-                  min="0"
-                  defaultValue={rates[key] ?? 0}
-                />
-                <p className="text-xs text-muted-foreground">{hint}</p>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-        <Button type="submit" variant="solar" className="mt-4" disabled={loading}>
-          {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-          Save Pricing
-        </Button>
-      </form>
+      {rates === null ? (
+        <div className="flex items-center gap-2 text-muted-foreground py-8">
+          <Loader2 className="h-4 w-4 animate-spin" /> Loading current rates…
+        </div>
+      ) : (
+        <form key={JSON.stringify(rates)} onSubmit={save}>
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Cost-Plus Rate Table</CardTitle>
+              <CardDescription>
+                Rates verified against the Solarponics Excel bid tool (OVERHEAD COST SHEET).
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {RATE_FIELDS.map(({ key, label, hint, step }) => (
+                <div key={key} className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-sm font-medium">{label}</Label>
+                    <span className="text-xs font-mono bg-muted px-2 py-0.5 rounded text-muted-foreground">
+                      current: {rates[key] ?? 0}
+                    </span>
+                  </div>
+                  <Input
+                    name={key}
+                    type="number"
+                    step={step}
+                    min="0"
+                    defaultValue={rates[key] ?? 0}
+                  />
+                  <p className="text-xs text-muted-foreground">{hint}</p>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+          <Button type="submit" variant="solar" className="mt-4" disabled={loading}>
+            {loading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+            Save Pricing
+          </Button>
+        </form>
+      )}
     </div>
   );
 }
