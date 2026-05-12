@@ -10,7 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { BidActions } from "./bid-actions";
 import { PhotoUpload } from "./photo-upload";
 import Link from "next/link";
-import { ArrowLeft, MapPin, Phone, Mail } from "lucide-react";
+import { ArrowLeft, MapPin, Phone, Mail, Pencil } from "lucide-react";
 
 export default async function BidDetailPage({ params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
@@ -41,12 +41,17 @@ export default async function BidDetailPage({ params }: { params: { id: string }
           <Link href="/bids"><ArrowLeft className="h-4 w-4" /></Link>
         </Button>
         <div className="flex-1">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
             <h1 className="text-2xl font-bold">{bid.bidNumber}</h1>
             <Badge variant={statusVariantMap[bid.status]}>{bid.status}</Badge>
           </div>
           <p className="text-muted-foreground text-sm">{formatDate(bid.createdAt)}</p>
         </div>
+        <Button variant="outline" size="sm" asChild>
+          <Link href={`/bids/${bid.id}/edit`}>
+            <Pencil className="h-3.5 w-3.5 mr-1.5" /> Edit Bid
+          </Link>
+        </Button>
       </div>
 
       {/* Customer */}
