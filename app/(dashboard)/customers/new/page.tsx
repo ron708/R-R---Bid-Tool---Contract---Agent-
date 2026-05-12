@@ -49,26 +49,26 @@ export default function NewCustomerPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="firstName">First Name *</Label>
+                <Label htmlFor="firstName">First Name <span className="text-destructive">*</span></Label>
                 <Input id="firstName" name="firstName" required />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="lastName">Last Name *</Label>
+                <Label htmlFor="lastName">Last Name <span className="text-destructive">*</span></Label>
                 <Input id="lastName" name="lastName" required />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input id="email" name="email" type="email" />
+                <Label htmlFor="email">Email <span className="text-destructive">*</span></Label>
+                <Input id="email" name="email" type="email" required />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="phone">Phone</Label>
-                <Input id="phone" name="phone" type="tel" />
+                <Label htmlFor="phone">Phone <span className="text-destructive">*</span></Label>
+                <Input id="phone" name="phone" type="tel" required />
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="siteAddress">Site Address *</Label>
+              <Label htmlFor="siteAddress">Site Address <span className="text-destructive">*</span></Label>
               <Input id="siteAddress" name="siteAddress" required placeholder="123 Main St" />
             </div>
             <div className="grid grid-cols-3 gap-4">
