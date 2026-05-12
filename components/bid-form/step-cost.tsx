@@ -66,7 +66,7 @@ export function StepCost({ form, update, milesLoading, milesNotFound, permitFeeA
         <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
           Auto-Calculated
         </p>
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div className="bg-muted rounded-lg p-3 text-center">
             <Wrench className="h-4 w-4 mx-auto mb-1 text-muted-foreground" />
             <p className="text-xs text-muted-foreground">Parts</p>

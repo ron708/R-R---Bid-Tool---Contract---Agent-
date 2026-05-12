@@ -67,7 +67,7 @@ export default async function BidDetailPage({ params }: { params: { id: string }
       {/* System */}
       <Card>
         <CardHeader><CardTitle className="text-base">Solar System</CardTitle></CardHeader>
-        <CardContent className="grid grid-cols-2 gap-x-8 gap-y-1 text-sm">
+        <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-1 text-sm">
           <div><span className="text-muted-foreground">Panels:</span> {bid.panelCount}</div>
           {bid.systemSizeKw && <div><span className="text-muted-foreground">Size:</span> {bid.systemSizeKw} kW</div>}
           {bid.panelBrand && <div><span className="text-muted-foreground">Brand:</span> {bid.panelBrand}</div>}

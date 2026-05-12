@@ -14,7 +14,7 @@ interface Props {
 export function StepRoofScope({ form, update }: Props) {
   return (
     <div className="space-y-5">
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label>Roof Type</Label>
           <Select
@@ -58,7 +58,7 @@ export function StepRoofScope({ form, update }: Props) {
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label>Stories</Label>
           <Select value={String(form.stories)} onValueChange={(v) => update({ stories: parseInt(v) })}>
@@ -83,7 +83,7 @@ export function StepRoofScope({ form, update }: Props) {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label>Attachment Type</Label>
           <Select value={form.attachmentType} onValueChange={(v) => update({ attachmentType: v })}>

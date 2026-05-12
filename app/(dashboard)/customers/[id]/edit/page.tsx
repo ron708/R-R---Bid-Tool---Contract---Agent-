@@ -70,7 +70,7 @@ export default function EditCustomerPage() {
         <CardHeader><CardTitle className="text-base">Customer Information</CardTitle></CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="firstName">First Name <span className="text-destructive">*</span></Label>
                 <Input id="firstName" required value={fields.firstName} onChange={(e) => set("firstName", e.target.value)} />
@@ -80,7 +80,7 @@ export default function EditCustomerPage() {
                 <Input id="lastName" required value={fields.lastName} onChange={(e) => set("lastName", e.target.value)} />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="email">Email <span className="text-destructive">*</span></Label>
                 <Input id="email" type="email" required value={fields.email} onChange={(e) => set("email", e.target.value)} />
@@ -94,7 +94,7 @@ export default function EditCustomerPage() {
               <Label htmlFor="siteAddress">Site Address <span className="text-destructive">*</span></Label>
               <Input id="siteAddress" required value={fields.siteAddress} onChange={(e) => set("siteAddress", e.target.value)} />
             </div>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="siteCity">City</Label>
                 <Input id="siteCity" value={fields.siteCity} onChange={(e) => set("siteCity", e.target.value)} />

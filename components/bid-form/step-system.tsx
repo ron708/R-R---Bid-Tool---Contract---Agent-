@@ -13,7 +13,7 @@ interface Props {
 export function StepSystem({ form, update }: Props) {
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="panelCount">Panel Count *</Label>
           <Input
@@ -38,7 +38,7 @@ export function StepSystem({ form, update }: Props) {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="panelBrand">Panel Brand</Label>
           <Input
@@ -59,7 +59,7 @@ export function StepSystem({ form, update }: Props) {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label>Inverter Type</Label>
           <Select value={form.inverterType} onValueChange={(v) => update({ inverterType: v })}>

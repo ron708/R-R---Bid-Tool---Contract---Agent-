@@ -45,7 +45,7 @@ export function StepReview({ form, customers, pricing }: Props) {
 
       <section>
         <p className="font-semibold text-base mb-2">Solar System</p>
-        <div className="grid grid-cols-2 gap-x-8 gap-y-1">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-1">
           <div><span className="text-muted-foreground">Panels:</span> {form.panelCount}</div>
           {form.systemSizeKw && <div><span className="text-muted-foreground">System Size:</span> {form.systemSizeKw} kW</div>}
           {form.panelBrand && <div><span className="text-muted-foreground">Brand:</span> {form.panelBrand} {form.panelModel}</div>}
@@ -57,7 +57,7 @@ export function StepReview({ form, customers, pricing }: Props) {
 
       <section>
         <p className="font-semibold text-base mb-2">Roof & Scope</p>
-        <div className="grid grid-cols-2 gap-x-8 gap-y-1">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-1">
           <div><span className="text-muted-foreground">Scope:</span> {scopeLabel[form.workScope] || form.workScope}</div>
           <div>
             <span className="text-muted-foreground">Roof:</span>{" "}
@@ -79,7 +79,7 @@ export function StepReview({ form, customers, pricing }: Props) {
       {isAdmin && (
         <section>
           <p className="font-semibold text-base mb-2">Cost Inputs</p>
-          <div className="grid grid-cols-2 gap-x-8 gap-y-1">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-1">
             <div><span className="text-muted-foreground">Parts:</span> {formatCurrency(form.partsEstimate)}</div>
             <div><span className="text-muted-foreground">Crew:</span> {form.crewCount} × {form.crewDays} days</div>
             {form.milesFromJob > 0 && <div><span className="text-muted-foreground">Miles:</span> {form.milesFromJob} mi</div>}
@@ -132,7 +132,7 @@ export function StepReview({ form, customers, pricing }: Props) {
           <span>Contract Total</span>
           <span className="text-solar-orange text-lg tabular-nums">{formatCurrency(pricing.total)}</span>
         </div>
-        <div className="mt-3 grid grid-cols-2 gap-4 text-sm text-muted-foreground">
+        <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-muted-foreground">
           <div>
             <span className="font-medium text-foreground">Deposit (10%):</span>{" "}
             <span className="tabular-nums">{formatCurrency(pricing.depositAmount)}</span>

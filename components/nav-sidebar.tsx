@@ -34,7 +34,11 @@ const adminLinks = [
   { href: "/admin/branding", label: "Branding & T&C", icon: Palette },
 ];
 
-export function NavSidebar() {
+interface NavSidebarProps {
+  onClose?: () => void;
+}
+
+export function NavSidebar({ onClose }: NavSidebarProps) {
   const pathname = usePathname();
   const { data: session } = useSession();
   const isAdmin = session?.user?.role === "SOLARPONICS_ADMIN";
@@ -62,8 +66,9 @@ export function NavSidebar() {
           <Link
             key={href}
             href={href}
+            onClick={onClose}
             className={cn(
-              "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
+              "flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors",
               pathname === href || (href !== "/dashboard" && href !== "/admin/dashboard" && pathname.startsWith(href))
                 ? "bg-primary text-primary-foreground"
                 : "text-muted-foreground hover:bg-muted hover:text-foreground"

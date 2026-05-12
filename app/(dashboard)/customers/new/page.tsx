@@ -47,7 +47,7 @@ export default function NewCustomerPage() {
         <CardHeader><CardTitle className="text-base">Customer Information</CardTitle></CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="firstName">First Name <span className="text-destructive">*</span></Label>
                 <Input id="firstName" name="firstName" required />
@@ -57,7 +57,7 @@ export default function NewCustomerPage() {
                 <Input id="lastName" name="lastName" required />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="email">Email <span className="text-destructive">*</span></Label>
                 <Input id="email" name="email" type="email" required />
@@ -71,7 +71,7 @@ export default function NewCustomerPage() {
               <Label htmlFor="siteAddress">Site Address <span className="text-destructive">*</span></Label>
               <Input id="siteAddress" name="siteAddress" required placeholder="123 Main St" />
             </div>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="siteCity">City</Label>
                 <Input id="siteCity" name="siteCity" />
