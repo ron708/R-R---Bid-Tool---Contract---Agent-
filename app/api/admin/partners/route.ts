@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
+import { sendPartnerInviteEmail } from "@/lib/email";
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -40,6 +41,17 @@ export async function POST(req: NextRequest) {
       contractorId: contractor.id,
     },
   });
+
+  // Send welcome email with login credentials (non-blocking — don't fail the request if email fails)
+  try {
+    await sendPartnerInviteEmail({
+      to: loginEmail.trim().toLowerCase(),
+      companyName: companyName.trim(),
+      password,
+    });
+  } catch (err) {
+    console.error("Partner invite email failed:", err);
+  }
 
   return NextResponse.json({ ok: true, contractorId: contractor.id }, { status: 201 });
 }
